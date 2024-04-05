@@ -44,6 +44,7 @@
 
   <!-- My script -->
   <node name="joint_effort_publisher" pkg="bipedal_robot" type="effort_publisher.py" output="screen"/>
+  <node name="talker" pkg="bipedal_robot" type="talker.py" output="screen"/>
 
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
     respawn="false" output="screen">

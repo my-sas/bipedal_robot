@@ -2,6 +2,7 @@
 import rospy
 from std_msgs.msg import Float64
 
+
 def move_joint():
     # Get joints names
     joints = ['left_hip_joint',
@@ -22,13 +23,14 @@ def move_joint():
     rate = rospy.Rate(50) # 10 Hz
 
     # Initialize effort value
-    effort = 6.0 # Change this value to whatever is appropriate
+    effort = 11.0 # Change this value to whatever is appropriate
 
     # Keep publishing until a Ctrl-C is pressed
     while not rospy.is_shutdown():
         # rospy.loginfo("Publishing effort: %f" % effort)
         pub[0].publish(effort)
     rate.sleep()
+
 
 if __name__ == '__main__':
     try:
