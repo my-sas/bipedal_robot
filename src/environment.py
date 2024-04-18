@@ -1,14 +1,7 @@
-#!/usr/bin/env python3
-import rospy
-from sensor_msgs.msg import JointState
+from ros_bridge import JointListener, LinkListener
 
-def callback(data):
-    rospy.loginfo("Data: %s", data)
-
-def listener():
-    rospy.init_node('joint_state_listener', anonymous=True)
-    rospy.Subscriber("/joint_states", JointState, callback)
-    rospy.spin()
-
-if __name__ == '__main__':
-    listener()
+class Enironment:
+    def __init__(self):
+        ...
+    def step(self, action):
+        return self.state, self.reward, done

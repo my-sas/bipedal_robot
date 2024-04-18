@@ -18,6 +18,7 @@
     respawn="false" output="screen" />
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
     <param name="publish_frequency" type="double" value="60.0" />
+    <remap from="/joint_states" to="/bipedal_robot/joint_states" />
   </node>
 
   <!-- Unpause the simulation after loading the robot model -->
@@ -49,6 +50,6 @@
     right_knee_joint_effort_controller"/>
 
   <!-- My scripts -->
-  <node name="environment" pkg="bipedal_robot" type="environment.py" output="screen"/>
+  <!-- <node name="environment" pkg="bipedal_robot" type="environment.py" output="screen"/> -->
   <node name="agent" pkg="bipedal_robot" type="effort_publisher.py" output="screen"/>
 </launch>
