@@ -11,15 +11,14 @@
     <arg name="paused" value="true"/>
   </include>
 
-  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
-    output="screen" ns="/bipedal_robot" args="
-    left_hip_joint_effort_controller
-    left_knee_joint_effort_controller
-    right_hip_joint_effort_controller
-    right_knee_joint_effort_controller"/>
-
   <!-- Set the robot urdf on the parameter server -->
   <param name="robot_description" command="xacro  '$(find bipedal_robot)/urdf/gazebo_bipedal_robot.urdf.xacro'" />
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+    respawn="false" output="screen" />
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    <param name="publish_frequency" type="double" value="60.0" />
+  </node>
 
   <!-- Unpause the simulation after loading the robot model -->
   <arg name="unpause" value="$(eval '' if arg('paused') else '-unpause')" />
@@ -42,12 +41,14 @@
     right_knee_joint_effort_controller
     " />
 
-  <!-- My script -->
-  <node name="joint_effort_publisher" pkg="bipedal_robot" type="effort_publisher.py" output="screen"/>
-  <node name="talker" pkg="bipedal_robot" type="talker.py" output="screen"/>
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+    output="screen" ns="/bipedal_robot" args="
+    left_hip_joint_effort_controller
+    left_knee_joint_effort_controller
+    right_hip_joint_effort_controller
+    right_knee_joint_effort_controller"/>
 
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
-    respawn="false" output="screen">
-    <remap from="/joint_states" to="/bipedal_robot/joint_states" />
-  </node>
+  <!-- My scripts -->
+  <node name="environment" pkg="bipedal_robot" type="environment.py" output="screen"/>
+  <node name="agent" pkg="bipedal_robot" type="effort_publisher.py" output="screen"/>
 </launch>
