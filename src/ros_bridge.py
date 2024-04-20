@@ -2,16 +2,17 @@
 import rospy
 from sensor_msgs.msg import JointState
 from gazebo_msgs.srv import GetLinkState
+from gazebo_msgs.msg import ModelStates
 from std_msgs.msg import Float64
+rospy.init_node('ros_bridge', anonymous=True)
 
 
 class LinkListener:
     def __init__(self):
-        rospy.init_node('joint_state_listener', anonymous=True)
         rospy.wait_for_service('/gazebo/get_link_state')
         self.service = rospy.ServiceProxy('/gazebo/get_link_state', GetLinkState)
 
-    def get_link_states(self, link_name, reference_frame='world'):
+    def get_data(self, link_name, reference_frame='world'):
         response = self.service(link_name, reference_frame)
         if response.success:
             return response.link_state.pose
@@ -21,7 +22,6 @@ class LinkListener:
 
 class JointListener:
     def __init__(self):
-        rospy.init_node('joint_state_listener', anonymous=True)
         rospy.Subscriber("/joint_states", JointState, self.callback)
         self.joint_states = None
 
@@ -29,21 +29,32 @@ class JointListener:
         # rospy.loginfo("Data: %s", data)
         self.joint_states = data
 
-    def get_joint_states(self):
+    def get_data(self):
         return self.joint_states
 
 
 class EffortPublisher:
     def __init__(self):
-        rospy.init_node('effort_publisher', anonymous=True)
-
-        self.joints = []
-        joints = [f'/bipedal_robot/{name}_effort_controller/command' for name in self.joints]
-
+        joints = ['left_knee_joint', 'left_knee_joint', 'right_hip_joint', 'right_knee_joint']
+        joints = [f'/bipedal_robot/{name}_effort_controller/command' for name in joints]
+        
         self.pub = []
         for joint in joints:
             self.pub.append(rospy.Publisher(joint, Float64, queue_size=10))
 
-    def publish(self, efforts: list):
+    def send(self, efforts: list):
         for i, effort in enumerate(efforts):
             self.pub[i].publish(effort)
+
+
+class VelocityListener:
+    def __init__(self):
+        rospy.Subscriber('/gazebo/model_states', ModelStates, self.callback)
+        self.velocity = None
+
+    def callback(self, data):
+        robot_index = data.name.index('robot')
+        self.velocity = data.twist[robot_index].linear.x
+
+    def get_data(self):
+        return self.velocity

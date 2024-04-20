@@ -51,5 +51,5 @@
 
   <!-- My scripts -->
   <!-- <node name="environment" pkg="bipedal_robot" type="environment.py" output="screen"/> -->
-  <node name="agent" pkg="bipedal_robot" type="effort_publisher.py" output="screen"/>
+  <!-- <node name="agent" pkg="bipedal_robot" type="effort_publisher.py" output="screen"/> -->
 </launch>

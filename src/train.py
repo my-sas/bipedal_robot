@@ -1,11 +1,9 @@
-from joint_listener import JointListener
-from link_listener import LinkListener
+import time
+from environment import Environment
 
-joint_listener = JointListener()
-link_listener = LinkListener()
+env = Environment()
 
-while True:
-    joint_data = joint_listener.get_joint_states()
-    link_data = link_listener.get_link_states('robot::dummy')
-    print(joint_data)
-    print(link_data)
+for i in range(10):
+    state, reward, done = env.step([2., 6., 2., 12.])
+    print(state)
+    time.sleep(1)
