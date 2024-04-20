@@ -1,9 +1,6 @@
-import time
+from stable_baselines3 import DDPG
 from environment import Environment
 
 env = Environment()
-
-for i in range(10):
-    state, reward, done = env.step([2., 6., 2., 12.])
-    print(state)
-    time.sleep(1)
+model = DDPG("MlpPolicy", env, verbose=1)
+model.learn(total_timesteps=1000)

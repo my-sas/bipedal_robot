@@ -3,6 +3,7 @@ import rospy
 from sensor_msgs.msg import JointState
 from gazebo_msgs.srv import GetLinkState
 from gazebo_msgs.msg import ModelStates
+from std_srvs.srv import Empty
 from std_msgs.msg import Float64
 rospy.init_node('ros_bridge', anonymous=True)
 
@@ -15,7 +16,8 @@ class LinkListener:
     def get_data(self, link_name, reference_frame='world'):
         response = self.service(link_name, reference_frame)
         if response.success:
-            return response.link_state.pose
+            link_states = response.link_state.pose.position
+            return [link_states.x, link_states.y, link_states.z]
         else:
             return None
 
@@ -27,7 +29,7 @@ class JointListener:
 
     def callback(self, data):
         # rospy.loginfo("Data: %s", data)
-        self.joint_states = data
+        self.joint_states = list(data.position) + list(data.velocity)
 
     def get_data(self):
         return self.joint_states
@@ -58,3 +60,9 @@ class VelocityListener:
 
     def get_data(self):
         return self.velocity
+
+
+def reset_simulation():
+    rospy.wait_for_service('/gazebo/reset_simulation')
+    reset_sim = rospy.ServiceProxy('/gazebo/reset_simulation', Empty)
+    reset_sim()
