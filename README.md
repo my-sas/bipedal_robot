@@ -1,6 +1,6 @@
 # Bipedal robot
 #### Description
-Publishes joint efforts return link coordinates
+Bipedal robot locomotion RL training environment
 
 ![Demo](images/screenshot.jpg)
 #### Usage
