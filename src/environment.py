@@ -2,28 +2,36 @@ import gym
 from gym import spaces
 import numpy as np
 import time
+import rospy
 from ros_bridge import JointListener, LinkListener, EffortPublisher, VelocityListener, reset_simulation
 
 
 class Environment(gym.Env):
     def __init__(self):
         super(Environment, self).__init__()
-        self.action_space = spaces.Box(low=-1., high=1., shape=(4,), dtype=np.float32)
-        self.observation_space = spaces.Box(low=-1., high=1., shape=(8+3,), dtype=np.float32)
+        self.action_space = spaces.Box(
+            low=-40., high=40., shape=(4,), dtype=np.float32
+        )
+        self.observation_space = spaces.Box(
+            low=-5., high=5., shape=(8+3,), dtype=np.float32
+        )
 
         self.joint_listener = JointListener()
         self.link_listener = LinkListener()
         self.effort_publisher = EffortPublisher()
         self.velocity_listener = VelocityListener()
+        self.rate = rospy.Rate(10)
 
     def reward_func(self, v, h):
         return v + 0.05 - (h * 10) ** 2
 
     def is_done(self, h):
-        return h < 0.8
+        return h < 0.9
 
     def step(self, action):
-        time.sleep(0.1)
+        rospy.sleep(15.0/60.0)
+        # time.sleep(0.05)
+        # self.rate.sleep()
 
         # do action
         self.effort_publisher.send(action)
@@ -41,6 +49,7 @@ class Environment(gym.Env):
 
     def reset(self):
         reset_simulation()
+        rospy.sleep(1.)
         return  # Пример начального состояния
 
     def close(self):

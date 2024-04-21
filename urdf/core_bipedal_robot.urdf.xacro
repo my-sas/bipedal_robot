@@ -70,18 +70,20 @@
             </inertial>
         </link>
 
-        <joint name="${name}_hip_joint" type="continuous">
+        <joint name="${name}_hip_joint" type="revolute">
             <parent link="base_link"/>
             <child link="${name}_thigh"/>
             <origin xyz="0 ${shift} -0.5" rpy="0 0 0"/>
             <axis xyz="0 1 0"/>
+            <limit lower="-1.57" upper="1.57" effort="50" velocity="0.5"/>
         </joint>
 
-        <joint name="${name}_knee_joint" type="continuous">
+        <joint name="${name}_knee_joint" type="revolute">
             <parent link="${name}_thigh"/>
             <child link="${name}_shin"/>
             <origin xyz="0 0 -1" rpy="0 0 0"/>
             <axis xyz="0 1 0"/>
+            <limit lower="0.0" upper="1.57" effort="50" velocity="0.5"/>
         </joint>
 	</xacro:macro>
 

@@ -5,6 +5,9 @@ from gazebo_msgs.srv import GetLinkState
 from gazebo_msgs.msg import ModelStates
 from std_srvs.srv import Empty
 from std_msgs.msg import Float64
+from gazebo_msgs.srv import SetModelState, SetModelStateRequest, SetModelConfiguration, SetModelConfigurationRequest
+from gazebo_msgs.msg import ModelState
+from gazebo_msgs.srv import GetModelState, GetModelStateRequest
 rospy.init_node('ros_bridge', anonymous=True)
 
 
@@ -14,6 +17,7 @@ class LinkListener:
         self.service = rospy.ServiceProxy('/gazebo/get_link_state', GetLinkState)
 
     def get_data(self, link_name, reference_frame='world'):
+        rospy.wait_for_service('/gazebo/get_link_state')
         response = self.service(link_name, reference_frame)
         if response.success:
             link_states = response.link_state.pose.position
@@ -24,7 +28,7 @@ class LinkListener:
 
 class JointListener:
     def __init__(self):
-        rospy.Subscriber("/joint_states", JointState, self.callback)
+        rospy.Subscriber("/joint_states", JointState, self.callback, queue_size=30)
         self.joint_states = None
 
     def callback(self, data):
@@ -62,7 +66,53 @@ class VelocityListener:
         return self.velocity
 
 
+# class Resetter:
+#     def __init__(self):
+#         self.pause_proxy = rospy.ServiceProxy('/gazebo/pause_physics', Empty)
+#         self.unpause_proxy = rospy.ServiceProxy('/gazebo/unpause_physics', Empty)
+#         self.model_config_proxy = rospy.ServiceProxy('/gazebo/set_model_configuration', SetModelConfiguration)
+#         self.model_config_req = SetModelConfigurationRequest()
+#         self.model_config_req.model_name = 'quadruped'
+#         self.model_config_req.urdf_param_name = 'robot_description'
+#         self.model_config_req.joint_names = self.joint_name_lst
+#         self.model_config_req.joint_positions = self.starting_pos
+#         self.model_state_proxy = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
+#         self.model_state_req = SetModelStateRequest()
+#         self.model_state_req.model_state = ModelState()
+#         self.model_state_req.model_state.model_name = 'quadruped'
+#         self.model_state_req.model_state.pose.position.x = 0.0
+#         self.model_state_req.model_state.pose.position.y = 0.0
+#         self.model_state_req.model_state.pose.position.z = 3.
+#         self.model_state_req.model_state.pose.orientation.x = 0.0
+#         self.model_state_req.model_state.pose.orientation.y = 0.0
+#         self.model_state_req.model_state.pose.orientation.z = 0.0
+#         self.model_state_req.model_state.pose.orientation.w = 0.0
+#         self.model_state_req.model_state.twist.linear.x = 0.0
+#         self.model_state_req.model_state.twist.linear.y = 0.0
+#         self.model_state_req.model_state.twist.linear.z = 0.0
+#         self.model_state_req.model_state.twist.angular.x = 0.0
+#         self.model_state_req.model_state.twist.angular.y = 0.0
+#         self.model_state_req.model_state.twist.angular.z = 0.0
+#         self.model_state_req.model_state.reference_frame = 'world'
+#
+#         self.get_model_state_proxy = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
+#         self.get_model_state_req = GetModelStateRequest()
+#         self.get_model_state_req.model_name = 'quadruped'
+#         self.get_model_state_req.relative_entity_name = 'world'
+
+
 def reset_simulation():
+    rospy.wait_for_service('/gazebo/pause_physics')
+    rospy.wait_for_service('/gazebo/unpause_physics')
     rospy.wait_for_service('/gazebo/reset_simulation')
+    rospy.wait_for_service('/gazebo/reset_world')
+
+    pause_proxy = rospy.ServiceProxy('/gazebo/pause_physics', Empty)
+    unpause_proxy = rospy.ServiceProxy('/gazebo/unpause_physics', Empty)
     reset_sim = rospy.ServiceProxy('/gazebo/reset_simulation', Empty)
+    reset_world = rospy.ServiceProxy('/gazebo/reset_world', Empty)
+
+    # pause_proxy()
     reset_sim()
+    reset_world()
+    # unpause_proxy()
