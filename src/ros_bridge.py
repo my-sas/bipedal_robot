@@ -62,9 +62,10 @@ class JointListener:
 
 
 class EffortPublisher:
-    def __init__(self):
+    def __init__(self, name):
+        self.name = name
         joints = ['left_hip_joint', 'right_hip_joint', 'left_knee_joint', 'right_knee_joint']
-        joints = [f'/bipedal_robot/{name}_effort_controller/command' for name in joints]
+        joints = [f'/{name}/{join}_effort_controller/command' for join in joints]
         
         self.pub = []
         for joint in joints:
@@ -76,29 +77,31 @@ class EffortPublisher:
 
 
 class VelocityListener:
-    def __init__(self):
-        rospy.Subscriber('/gazebo/model_states', ModelStates, self.callback)
+    def __init__(self, name):
+        rospy.Subscriber("/gazebo/model_states", ModelStates, self.callback)
+        self.name = name
         self.velocity = None
 
     def callback(self, data):
-        robot_index = data.name.index('robot')
+        robot_index = data.name.index(self.name)
         self.velocity = data.twist[robot_index].linear.x
 
     def get_data(self):
         return self.velocity
 
 
-class ContactListener:
-    def __init__(self):
-        rospy.Subscriber("/gazebo/base_collision", ContactsState, self.callback)
-        self.contacts = None
-
-    def callback(self, data):
-        self.contacts = data
-        # self.contacts = [[force for force in contact]  for contact in data.states]
-
-    def get_data(self):
-        return self.contacts
+# cant do this class yet
+# class ContactListener:
+#     def __init__(self):
+#         rospy.Subscriber("/gazebo/base_collision", ContactsState, self.callback)
+#         self.contacts = None
+#
+#     def callback(self, data):
+#         self.contacts = data
+#         # self.contacts = [[force for force in contact]  for contact in data.states]
+#
+#     def get_data(self):
+#         return self.contacts
 
 
 class Spawner:
@@ -146,6 +149,11 @@ class Despawner:
     def delete_model(self):
         response = self.service(model_name)
         print(response.status_message)
+
+
+class Launcher:
+    def __init__(self):
+
 
 
 class Reloader:

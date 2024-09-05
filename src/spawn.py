@@ -2,6 +2,14 @@ import rospy
 import rospkg
 from gazebo_msgs.srv import SpawnModel
 from geometry_msgs.msg import Pose
+# import roslib; roslib.load_manifest('joint_state_publisher')
+
+# import subprocess
+#
+# rospy.set_param('robot_description', "xacro '$(find bipedal_robot)/urdf/gazebo_bipedal_robot.urdf.xacro'")
+#
+# subprocess.call(['rosrun', 'robot_state_publisher', 'robot_state_publisher'])
+
 
 PACKAGE_PATH = rospkg.RosPack().get_path('bipedal_robot')  # path to ros package
 URDF_PATH = PACKAGE_PATH + "/urdf/full_bipedal_robot.urdf"  # path to urdf models
@@ -10,6 +18,7 @@ BASE_NAME = "robot"  # model names will be robot1, robot2, etc
 SPACE = 10.  # space between robots along y-axis
 INIT_POSE = [0., 0., 1.]  # coordinates of model base link
 
+
 def spawn_model(name, pose):
     """Spawns model from URDF_PATH in gazebo simulation
 
@@ -17,10 +26,15 @@ def spawn_model(name, pose):
         name (str): Name by which you can interact with the model
         pose (list): List of xyz coordinates of model base link
     """
-    rospy.init_node('spawn_my_robot')
+
+    # rospy.init_node('spawn_robot')
+    remap_arg = f"/{name}/joint_states:=/joint_states"
+    rospy.init_node('spawn_robot', argv=[remap_arg])
+
     rospy.wait_for_service('gazebo/spawn_urdf_model')
+
     try:
-        spawn_model = rospy.ServiceProxy('gazebo/spawn_urdf_model', SpawnModel)
+        service = rospy.ServiceProxy('gazebo/spawn_urdf_model', SpawnModel)
         with open(URDF_PATH, 'r') as file:
             robot_urdf = file.read()
 
@@ -31,7 +45,7 @@ def spawn_model(name, pose):
         initial_pose.position.z = pose[2]  # height above ground
 
         # call the service to spawn the model
-        resp = spawn_model(name, robot_urdf, "", initial_pose, "world")
+        resp = service(name, robot_urdf, "/", initial_pose, "world")
         print("Spawn status:", resp.success, resp.status_message)
     except rospy.ServiceException as e:
         print("Service call failed: %s" % e)
@@ -48,45 +62,6 @@ if __name__ == "__main__":
     spawn_models(BASE_NAME, N_MODELS, INIT_POSE, SPACE)
 
 
-# def spawn_urdf(name, description_xml, pose, reference_frame):
-#     rospy.wait_for_service('/gazebo/spawn_urdf_model')
-#     try:
-#         spawn_urdf = rospy.ServiceProxy('/gazebo/spawn_urdf_model', SpawnModel)
-#         spawn_urdf(name, description_xml, "", pose, reference_frame)
-#     except rospy.ServiceException as e:
-#         rospy.logerr("Spawn URDF service call failed: {0}".format(e))
-#     return
-#
-#
-# def load_xacro_file(file_path, mappings):
-#     urdf_doc = xacro.process_file(file_path)
-#     urdf_xml = urdf_doc.toprettyxml(indent='  ', encoding='utf-8')
-#     urdf_xml = urdf_xml.replace('\n', '')
-#     return urdf_xml
-#
-#
-# def spawn_xacro_urdf_model(name, path, pose, reference_frame, mappings):
-#     description_xml = load_xacro_file(path, mappings)
-#     spawn_urdf(name, description_xml, pose, reference_frame)
-#     return
-#
-#
-# def main():
-#     rospy.init_node("spawn_bipedal_robots")
-#     rospy.wait_for_service("gazebo/delete_model")
-#     rospy.wait_for_service("gazebo/spawn_model")
-#
-#     MODEL_PATH = "./urdf/gazebo_bipedal_robot.urdf.xacro"
-#     pose = Pose(position=Point(x=-0.3, y=0.7, z=0.7828))
-#     model = load_xacro_file(MODEL_PATH, {})
-#     print(model)
-#
-#     # spawn_xacro_urdf_model('robot', MODEL_PATH, pose, "world", {})
-#     return
-#
-#
-# if __name__ == '__main__':
-#     main()
 
 
 

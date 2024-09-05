@@ -1,0 +1,18 @@
+<launch>
+    <arg name="name" default="robot"/>
+    <arg name="world_pose" default="-x 0 -y 0 -z 2.5 -R 0 -P 0 -Y 0" />
+
+    <param name="robot_description" command="xacro  '$(find bipedal_robot)/urdf/gazebo_bipedal_robot.urdf.xacro'" />
+
+    <node name="spawn_gazebo_model" pkg="gazebo_ros" type="spawn_model"
+        args="-urdf -param robot_description -model robot $(arg world_pose)"
+        respawn="false" output="screen" />
+
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen" />
+
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+        <param name="publish_frequency" type="double" value="60.0" />
+    </node>
+
+    <rosparam file="$(find bipedal_robot)/config/effort_controller.yaml" command="load" />
+</launch>
