@@ -6,52 +6,10 @@
   <arg name="world_pose" default="-x 0 -y 0 -z 2.5 -R 0 -P 0 -Y 0" doc="Pose to spawn the robot at"/>
   <arg name="initial_joint_positions" default=" -J left_hip_joint 0" doc="Initial joint configuration of the robot"/>
 
-  <!-- Запуск Gazebo -->
+  <!-- Gazebo launch -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch" pass_all_args="true">
-    <arg name="paused" value="true"/>
+    <arg name="paused" value="false"/>
     <arg name="/use_sim_time" value="true"/>
-    <!-- <arg name="gui" value="false"/> -->
+    <arg name="gui" value="true"/>
   </include>
-
-  <!-- Set the robot urdf on the parameter server -->
-  <param name="robot_description" command="xacro  '$(find bipedal_robot)/urdf/gazebo_bipedal_robot.urdf.xacro'" />
-
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
-    respawn="false" output="screen" />
-  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
-    <param name="publish_frequency" type="double" value="60.0" />
-    <remap from="/joint_states" to="/bipedal_robot/joint_states" />
-  </node>
-
-  <!-- Unpause the simulation after loading the robot model -->
-  <arg name="unpause" value="$(eval '' if arg('paused') else '-unpause')" />
-
-  <!-- Spawn the robot in Gazebo -->
-  <node name="spawn_gazebo_model" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model robot $(arg unpause) $(arg world_pose) $(arg initial_joint_positions)"
-    respawn="false" output="screen" />
-
-  <!-- Load the controller parameters onto the parameter server -->
-  <rosparam file="$(find bipedal_robot)/config/effort_controller.yaml" command="load" />
-  <!-- <include file="$(dirname)/ros_controllers.launch"/> -->
-
-  <!-- Spawn the Gazebo ROS controllers -->
-  <node name="gazebo_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"
-    args="
-    joint_state_controller
-    left_hip_joint_effort_controller
-    left_knee_joint_effort_controller
-    right_hip_joint_effort_controller
-    right_knee_joint_effort_controller
-    " />
-
-  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
-    output="screen" ns="/bipedal_robot" args="
-    left_hip_joint_effort_controller
-    left_knee_joint_effort_controller
-    right_hip_joint_effort_controller
-    right_knee_joint_effort_controller"/>
-
-  <!-- My scripts -->
-  <!-- <node name="environment" pkg="bipedal_robot" type="environment.py" output="screen"/> -->
-  <!-- <node name="agent" pkg="bipedal_robot" type="effort_publisher.py" output="screen"/> -->
 </launch>
