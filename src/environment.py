@@ -10,13 +10,12 @@ from ros_bridge import Spawner, JointListener, LinkListener, EffortPublisher, Ve
 
 
 class Environment(gym.Env):
-    def __init__(self, name):
+    def __init__(self, name, pose):
         super(Environment, self).__init__()
 
         # initialize node and set namespace
         self.name = name
-        remap_arg = f"{name}/joint_states:=joint_states"
-        rospy.init_node(f"{name}_env", argv=[remap_arg])
+        rospy.init_node(f"{name}_env", anonymous=True, disable_signals=False)
 
         # define action and observation spaces
         self.state = None  # current robot state
@@ -33,24 +32,20 @@ class Environment(gym.Env):
         self.rate = rospy.Rate(60)  # rate of actions
         self.step_n = 0  # step counter
         self.max_step = 1000  # max length of episode
-        self.min_height = 0.65  #
+        self.min_height = 0.65
+        self.pose = pose  # initial coordinates
 
         # initialize ros interfaces
-        self.spawner = Spawner()
-        self.joint_listener = JointListener()
-        self.link_listener = LinkListener()
-        self.effort_publisher = EffortPublisher()
-        self.velocity_listener = VelocityListener()
-        # self.contact_listener = ContactListener()
-        self.resetter = Reloader()
+        self.spawner = Spawner(name)
+        self.spawner.spawn(self.pose)
+        time.sleep(5)
 
-    def make(self, init_pose):
-        """Launches gazebo simulation, spawns models
-        """
-        self.spawner.spawn_model(self.name, init_pose)
-
-
-
+        self.joint_listener = JointListener(name)
+        self.link_listener = LinkListener(name)
+        self.effort_publisher = EffortPublisher(name)
+        self.velocity_listener = VelocityListener(name)
+        # self.contact_listener = ContactListener(name)
+        self.reloader = Reloader(name, self.pose)
 
     def reward_func(self, v, h, efforts, step_n):
         return v*4 + 0.1*step_n  # + h*3 - np.sum(abs(efforts))*0.1
@@ -81,20 +76,20 @@ class Environment(gym.Env):
         self.prev_actions.append(action)
 
         # print(f'v: {velocity_data*4}, h: {coordinates[-1]}, efforts: {-np.sum(abs(action))*0.1}, step_n: {self.step_n*0.05}')
+        # print(joint_data)
 
         return self.state, reward, done, False, info
 
     def reset(self, seed=None, options=None):
         print('Episode done')
-        super().reload(seed=seed, options=options)
 
         self.step_n = 0
         self.prev_actions = [np.zeros(4)] * 6
         # reset_simulation()
-        self.resetter.reload()
+        self.reloader.reload()
 
         joint_data = self.joint_listener.get_data()
-        orientation, coordinates = self.link_listener.get_data(f"{self.name}::dummy")
+        orientation, coordinates = self.link_listener.get_data("dummy")
         return np.concatenate([np.array(joint_data + orientation), np.concatenate(self.prev_actions)]), {}
 
     def close(self):

@@ -27,11 +27,17 @@
 	<xacro:transmission joint="right_hip_joint"/>
 	<xacro:transmission joint="right_knee_joint"/>
 
-	<gazebo>
+	<!-- <gazebo>
         <plugin name="joint_state_publisher" filename="libgazebo_ros_joint_state_publisher.so">
             <jointName>left_hip_joint, left_knee_joint, right_hip_joint, right_knee_joint</jointName>
             <updateRate>50.0</updateRate>
             <alwaysOn>true</alwaysOn>
+        </plugin>
+    </gazebo> -->
+
+    <gazebo>
+        <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+            <!-- <robotNamespace>/</robotNamespace> -->
         </plugin>
     </gazebo>
 </robot>
