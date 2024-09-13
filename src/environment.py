@@ -6,7 +6,7 @@ from gymnasium import spaces
 import numpy as np
 import time
 import rospy
-from ros_bridge import Spawner, JointListener, LinkListener, EffortPublisher, VelocityListener, Reloader
+from ros_bridge import Spawner, JointListener, LinkListener, EffortPublisher, VelocityListener, Reloader, reset_simulation
 
 
 class Environment(gym.Env):
@@ -31,8 +31,8 @@ class Environment(gym.Env):
         # other environment parameters
         self.rate = rospy.Rate(60)  # rate of actions
         self.step_n = 0  # step counter
-        self.max_step = 1000  # max length of episode
-        self.min_height = 0.65
+        self.max_step = 10000  # max length of episode
+        self.min_height = 0.12
         self.pose = pose  # initial coordinates
 
         # initialize ros interfaces
@@ -48,10 +48,10 @@ class Environment(gym.Env):
         self.reloader = Reloader(name, self.pose)
 
     def reward_func(self, v, h, efforts, step_n):
-        return v*4 + 0.1*step_n  # + h*3 - np.sum(abs(efforts))*0.1
+        return v*0.3 + 0.9 + h*1.1
 
     def is_done(self, h):
-        return (self.step_n > self.max_step) or (h < 0.65)
+        return (self.step_n > self.max_step) or (h < self.min_height)
 
     def step(self, action):
         self.rate.sleep()
@@ -62,31 +62,30 @@ class Environment(gym.Env):
 
         # get observation data
         joint_data = self.joint_listener.get_data()
-        orientation, coordinates = self.link_listener.get_data("dummy") # body coordinates
+        orientation, coordinates = self.link_listener.get_data("dummy")  # body coordinates
         velocity_data = self.velocity_listener.get_data()
-        # contact_data = self.contact_listener.get_data() # no contact data yet
+        # contact_data = self.contact_listener.get_data()  # no contact data yet
 
         self.state = np.concatenate([np.array(joint_data + orientation),
                                      np.concatenate(self.prev_actions)])
-        reward = self.reward_func(velocity_data, coordinates[-1], action, self.step_n) # forward speed, body height
-        done = self.is_done(coordinates[-1]) # body height
+        reward = self.reward_func(velocity_data, coordinates[-1], action, self.step_n)  # forward speed, body height
+        done = self.is_done(coordinates[-1])  # body height
         info = {}
 
         self.prev_actions.pop()
         self.prev_actions.append(action)
 
-        # print(f'v: {velocity_data*4}, h: {coordinates[-1]}, efforts: {-np.sum(abs(action))*0.1}, step_n: {self.step_n*0.05}')
-        # print(joint_data)
-
         return self.state, reward, done, False, info
 
     def reset(self, seed=None, options=None):
         print('Episode done')
+        self.effort_publisher.send([0., 0., 0., 0.])
 
         self.step_n = 0
         self.prev_actions = [np.zeros(4)] * 6
-        # reset_simulation()
-        self.reloader.reload()
+        reset_simulation()
+        self.effort_publisher.send([0., 0., 0., 0.])
+        # self.reloader.reload()
 
         joint_data = self.joint_listener.get_data()
         orientation, coordinates = self.link_listener.get_data("dummy")

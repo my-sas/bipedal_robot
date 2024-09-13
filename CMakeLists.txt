@@ -11,7 +11,22 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  ## message_generation  ## for simulation manager
 )
+
+#add_service_files(
+#  FILES
+#  ReadySignal.srv
+#)
+
+#generate_messages(
+#  DEPENDENCIES
+#  std_msgs
+#)
+
+#catkin_package(
+#  CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
+#)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)

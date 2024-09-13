@@ -23,6 +23,8 @@ from gazebo_msgs.srv import SetModelConfigurationRequest
 from gazebo_msgs.srv import SetModelState
 from gazebo_msgs.msg import ModelState
 from geometry_msgs.msg import Pose
+from controller_manager_msgs.srv import SwitchController
+from std_srvs.srv import Empty
 
 # from geometry_msgs.msg import Pose
 # from std_srvs.srv import Empty
@@ -197,6 +199,8 @@ class Reloader:
         self.state_service = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
         self.config_service = rospy.ServiceProxy('/gazebo/set_model_configuration', SetModelConfiguration)
 
+        self.effort_pub = EffortPublisher(name)
+
         # initial coordinates
         self.coordinates = Pose()
         self.coordinates.position.x = pose[0]
@@ -217,13 +221,60 @@ class Reloader:
         self.joint_state.joint_names = ['left_knee_joint', 'left_knee_joint', 'right_hip_joint', 'right_knee_joint']
         self.joint_state.joint_positions = np.array([0., 0., 0., 0.])
 
+        # self.joint_publisher = rospy.Publisher(f"/{name}/joint_states", JointState, queue_size=10)
+        # self.joint_pose = JointState()
+        # self.joint_pose.name = ['left_hip_joint', 'right_hip_joint', 'left_knee_joint', 'right_knee_joint']
+        # self.joint_pose.position = [0., 0., 0., 0.]
+
+        self.switch_service = rospy.ServiceProxy('/effort_controller_spawner/switch_controller', SwitchController)
+        self.controllers = [f"/{name}/left_hip_joint_effort_controller/",
+                            f"/{name}/left_knee_joint_effort_controller/",
+                            f"/{name}/right_hip_joint_effort_controller/",
+                            f"/{name}/right_knee_joint_effort_controller/"]
+
+    def restart_controllers(self):
+        rospy.wait_for_service('/effort_controller_spawner/switch_controller')
+        self.switch_service(stop_controllers=self.controllers, start_controllers=[], strictness=2)
+
+        rospy.wait_for_service('/effort_controller_spawner/switch_controller')
+        self.switch_service(stop_controllers=[], start_controllers=self.controllers, strictness=2)
+
     def reload(self):
+        self.restart_controllers()
+
         rospy.wait_for_service('/gazebo/set_model_state')
         response = self.state_service(self.position)
 
         rospy.wait_for_service('/gazebo/set_model_configuration')
         response = self.config_service(self.joint_state)
 
+        # self.joint_pose.header.stamp = rospy.Time.now()
+        # self.joint_publisher.publish(self.joint_pose)
+
         rospy.wait_for_service('/gazebo/set_model_state')
+        # rospy.wait_for_service(f"/{self.name}/joint_states")
         rospy.wait_for_service('/gazebo/set_model_configuration')
         # rospy.sleep(3)
+
+def wait_for_reset():
+    rospy.wait_for_service('node_ready')
+    ready_service = rospy.ServiceProxy('node_ready', ReadySignal)
+    resp = ready_service()
+
+
+
+
+def reset_simulation():
+    rospy.sleep(1)
+    rospy.wait_for_service('/gazebo/pause_physics')
+    rospy.wait_for_service('/gazebo/unpause_physics')
+    rospy.wait_for_service('/gazebo/reset_simulation')
+    rospy.wait_for_service('/gazebo/reset_world')
+    pause_proxy = rospy.ServiceProxy('/gazebo/pause_physics', Empty)
+    unpause_proxy = rospy.ServiceProxy('/gazebo/unpause_physics', Empty)
+    reset_sim = rospy.ServiceProxy('/gazebo/reset_simulation', Empty)
+    reset_world = rospy.ServiceProxy('/gazebo/reset_world', Empty)
+    pause_proxy()
+    reset_sim()
+    reset_world()
+    unpause_proxy()

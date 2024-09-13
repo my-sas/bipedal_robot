@@ -8,6 +8,11 @@ left_knee_joint_effort_controller:
   joint: left_knee_joint
   pid: {p: 100.0, i: 0.01, d: 10.0}
 
+left_ankle_joint_effort_controller:
+  type: effort_controllers/JointEffortController
+  joint: left_knee_joint
+  pid: {p: 100.0, i: 0.01, d: 10.0}
+
 right_hip_joint_effort_controller:
   type: effort_controllers/JointEffortController
   joint: right_hip_joint
@@ -16,4 +21,9 @@ right_hip_joint_effort_controller:
 right_knee_joint_effort_controller:
   type: effort_controllers/JointEffortController
   joint: right_knee_joint
+  pid: {p: 100.0, i: 0.01, d: 10.0}
+
+right_ankle_joint_effort_controller:
+  type: effort_controllers/JointEffortController
+  joint: left_knee_joint
   pid: {p: 100.0, i: 0.01, d: 10.0}

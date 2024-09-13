@@ -10,7 +10,7 @@
     </joint>
 
 	<xacro:macro name="transmission" params="joint">
-        <transmission name="transmission1">
+        <transmission name="${joint}_transmission">
             <type>transmission_interface/SimpleTransmission</type>
             <joint name="${joint}">
                 <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>

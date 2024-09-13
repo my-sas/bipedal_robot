@@ -1,6 +1,6 @@
 <launch>
     <arg name="name" default="robot"/>
-    <arg name="pose" default="-x 0 -y 0 -z 2.5 -R 0 -P 0 -Y 0" />
+    <arg name="pose" default="-x 0 -y 0 -z 0.3 -R 0 -P 0 -Y 0" />
 
     <group ns="$(arg name)">
         <param name="robot_description" command="xacro  '$(find bipedal_robot)/urdf/gazebo_bipedal_robot.urdf.xacro'" />
