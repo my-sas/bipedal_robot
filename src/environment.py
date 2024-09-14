@@ -19,14 +19,24 @@ class Environment(gym.Env):
 
         # define action and observation spaces
         self.state = None  # current robot state
+
+        # action space includes efforts of six joints
         self.action_space = spaces.Box(
-            low=np.array([-50., -50., -30., -30.]),
-            high=np.array([50., 50., 30., 30.]),
-            shape=(4,), dtype=np.float32)
+            low=np.array([-1., -1., -1., -1., -1., -1.]),
+            high=np.array([1., 1., 1., 1., 1., 1.]),
+            shape=(6,), dtype=np.float32)
+
         self.observation_space = spaces.Box(
-            low=-50., high=50.,
-            shape=(12+24,), dtype=np.float32)
-        self.prev_actions = [np.zeros(4)] * 6
+            low=-np.array([-1.57, -1.57, 0.0, 0.0, -1.57, -1.57,
+                           -1.5, -1.5, -1.5, -1.5, -1.5, -1.5,
+                           -1.1, -1.1, -1.1,
+                           -1., -1., -1., -1., -1., -1.]),
+            high=np.array([1.57, 1.57, 1.57, 1.57, 1.57, 1.57,
+                           1.5, 1.5, 1.5, 1.5, 1.5, 1.5,
+                           1.1, 1.1, 1.1,
+                           1., 1., 1., 1., 1., 1.]),
+            shape=(21,), dtype=np.float32)
+        self.prev_action = np.zeros(6)
 
         # other environment parameters
         self.rate = rospy.Rate(60)  # rate of actions
@@ -48,7 +58,9 @@ class Environment(gym.Env):
         self.reloader = Reloader(name, self.pose)
 
     def reward_func(self, v, h, efforts, step_n):
-        return v*0.3 + 0.9 + h*1.1
+        print(f"{h*0.9:.3f} {np.abs(efforts).sum()*0.016:.3f} {v*0.5:.3f}")
+        return -(v*0.5 + 1.1 + h*0.9 - np.abs(efforts).sum()*0.016)
+        # return -(-v*0.1 + 2.1 - h*0.05)
 
     def is_done(self, h):
         return (self.step_n > self.max_step) or (h < self.min_height)
@@ -58,7 +70,7 @@ class Environment(gym.Env):
         self.step_n += 1
 
         # do action
-        self.effort_publisher.send(action)
+        self.effort_publisher.send(action * 10)
 
         # get observation data
         joint_data = self.joint_listener.get_data()
@@ -66,30 +78,31 @@ class Environment(gym.Env):
         velocity_data = self.velocity_listener.get_data()
         # contact_data = self.contact_listener.get_data()  # no contact data yet
 
-        self.state = np.concatenate([np.array(joint_data + orientation),
-                                     np.concatenate(self.prev_actions)])
-        reward = self.reward_func(velocity_data, coordinates[-1], action, self.step_n)  # forward speed, body height
+        self.state = np.concatenate((joint_data, velocity_data, self.prev_action))
+        reward = self.reward_func(velocity_data[0], coordinates[-1], action, self.step_n)  # forward speed, body height
         done = self.is_done(coordinates[-1])  # body height
         info = {}
 
-        self.prev_actions.pop()
-        self.prev_actions.append(action)
+        # update previous action
+        self.prev_action = action
 
         return self.state, reward, done, False, info
 
     def reset(self, seed=None, options=None):
         print('Episode done')
-        self.effort_publisher.send([0., 0., 0., 0.])
+        self.effort_publisher.send([0., 0., 0., 0., 0., 0.])
 
         self.step_n = 0
-        self.prev_actions = [np.zeros(4)] * 6
+        self.prev_action = np.zeros(6)
         reset_simulation()
-        self.effort_publisher.send([0., 0., 0., 0.])
+        self.effort_publisher.send([0., 0., 0., 0., 0., 0.])
         # self.reloader.reload()
 
         joint_data = self.joint_listener.get_data()
         orientation, coordinates = self.link_listener.get_data("dummy")
-        return np.concatenate([np.array(joint_data + orientation), np.concatenate(self.prev_actions)]), {}
+        velocity_data = self.velocity_listener.get_data()
+        state = np.concatenate((joint_data, velocity_data, self.prev_action))
+        return state, {}
 
     def close(self):
         # Закрытие соединений и очистка ресурсов

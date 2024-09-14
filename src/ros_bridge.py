@@ -57,8 +57,8 @@ class LinkListener:
             coordinates = response.link_state.pose.position
             orientation = response.link_state.pose.orientation
             return (
-                [orientation.x, orientation.y, orientation.z, orientation.w],
-                [coordinates.x, coordinates.y, coordinates.z])
+                np.array([orientation.x, orientation.y, orientation.z, orientation.w]),
+                np.array([coordinates.x, coordinates.y, coordinates.z]))
         else:
             return None
 
@@ -70,7 +70,7 @@ class JointListener:
 
     def callback(self, data):
         # rospy.loginfo("Data: %s", data)
-        self.joint_states = list(data.position) + list(data.velocity)
+        self.joint_states = np.array(list(data.position) + list(data.velocity))
 
     def get_data(self):
         return self.joint_states
@@ -79,7 +79,10 @@ class JointListener:
 class EffortPublisher:
     def __init__(self, name):
         self.name = name
-        joints = ['left_hip_joint', 'right_hip_joint', 'left_knee_joint', 'right_knee_joint']
+        joints = [
+            'left_hip_joint', 'right_hip_joint',
+            'left_knee_joint', 'right_knee_joint',
+            'left_ankle_joint', 'right_ankle_joint']
         joints = [f'/{name}/{join}_effort_controller/command' for join in joints]
         
         self.pub = []
@@ -99,7 +102,10 @@ class VelocityListener:
 
     def callback(self, data):
         robot_index = data.name.index(self.name)
-        self.velocity = data.twist[robot_index].linear.x
+        self.velocity = np.array([
+            data.twist[robot_index].linear.x,
+            data.twist[robot_index].linear.y,
+            data.twist[robot_index].linear.z])
 
     def get_data(self):
         return self.velocity

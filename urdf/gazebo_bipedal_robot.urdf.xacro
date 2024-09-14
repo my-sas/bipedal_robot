@@ -22,22 +22,33 @@
         </transmission>
 	</xacro:macro>
 
-	<xacro:transmission joint="left_hip_joint"/>
+	<xacro:transmission joint="left_hip_joint1"/>
+	<xacro:transmission joint="left_hip_joint2"/>
 	<xacro:transmission joint="left_knee_joint"/>
-	<xacro:transmission joint="right_hip_joint"/>
+	<xacro:transmission joint="left_ankle_joint1"/>
+	<xacro:transmission joint="left_ankle_joint2"/>
+	<xacro:transmission joint="right_hip_joint1"/>
+	<xacro:transmission joint="right_hip_joint2"/>
 	<xacro:transmission joint="right_knee_joint"/>
-
-	<!-- <gazebo>
-        <plugin name="joint_state_publisher" filename="libgazebo_ros_joint_state_publisher.so">
-            <jointName>left_hip_joint, left_knee_joint, right_hip_joint, right_knee_joint</jointName>
-            <updateRate>50.0</updateRate>
-            <alwaysOn>true</alwaysOn>
-        </plugin>
-    </gazebo> -->
+	<xacro:transmission joint="right_ankle_joint1"/>
+	<xacro:transmission joint="right_ankle_joint2"/>
 
     <gazebo>
         <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
             <!-- <robotNamespace>/</robotNamespace> -->
         </plugin>
+    </gazebo>
+
+    <gazebo reference="left_foot">
+        <sensor name="left_foot_sensor" type="contact">
+            <always_on>true</always_on>
+            <contact>
+                <collision>left_foot_collision_collision</collision>
+            </contact>
+            <plugin name="left_foot_plugin" filename="libgazebo_ros_bumper.so">
+                <bumperTopicName>left_foot_contact</bumperTopicName>
+                <frameName>left_foot</frameName>
+            </plugin>
+        </sensor>
     </gazebo>
 </robot>

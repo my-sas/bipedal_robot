@@ -1,0 +1,490 @@
+<sdf version='1.7'>
+  <model name='bipedal_robot'>
+    <link name='dummy'>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>0.16</mass>
+        <inertia>
+          <ixx>0.1</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.1</iyy>
+          <iyz>0</iyz>
+          <izz>0.1</izz>
+        </inertia>
+      </inertial>
+      <collision name='dummy_fixed_joint_lump__base_link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.05 0.08 0.08</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name='dummy_fixed_joint_lump__base_link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.05 0.08 0.08</size>
+          </box>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='left_hip_joint1' type='revolute'>
+      <pose relative_to='dummy'>0 0.04 -0.03 0 -0 0</pose>
+      <parent>dummy</parent>
+      <child>left_hip_link</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.57</lower>
+          <upper>1.57</upper>
+          <effort>20</effort>
+          <velocity>1.5</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.5</damping>
+          <friction>0.3</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='left_hip_link'>
+      <pose relative_to='left_hip_joint1'>0 0 0 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.1</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.1</iyy>
+          <iyz>0</iyz>
+          <izz>0.1</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='left_hip_joint2' type='revolute'>
+      <pose relative_to='left_hip_link'>0 0 -0.03 0 -0 0</pose>
+      <parent>left_hip_link</parent>
+      <child>left_thigh</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1.57</lower>
+          <upper>1.57</upper>
+          <effort>20</effort>
+          <velocity>1.5</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.5</damping>
+          <friction>0.3</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='left_thigh'>
+      <pose relative_to='left_hip_joint2'>0 0 0 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>0.16</mass>
+        <inertia>
+          <ixx>0.1</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.1</iyy>
+          <iyz>0</iyz>
+          <izz>0.1</izz>
+        </inertia>
+      </inertial>
+      <collision name='left_thigh_collision_collision'>
+        <pose>0 0 -0.05 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.1</length>
+            <radius>0.01</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='left_thigh_visual'>
+        <pose>0 0 -0.05 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.1</length>
+            <radius>0.01</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='left_knee_joint' type='revolute'>
+      <pose relative_to='left_thigh'>0 0 -0.1 0 -0 0</pose>
+      <parent>left_thigh</parent>
+      <child>left_shin</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.57</upper>
+          <effort>20</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.5</damping>
+          <friction>0.3</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='left_shin'>
+      <pose relative_to='left_knee_joint'>0 0 0 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>0.16</mass>
+        <inertia>
+          <ixx>0.1</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.1</iyy>
+          <iyz>0</iyz>
+          <izz>0.1</izz>
+        </inertia>
+      </inertial>
+      <collision name='left_shin_collision_collision'>
+        <pose>0 0 -0.05 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.1</length>
+            <radius>0.01</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='left_shin_visual'>
+        <pose>0 0 -0.05 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.1</length>
+            <radius>0.01</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='left_ankle_joint1' type='revolute'>
+      <pose relative_to='left_shin'>0 0 -0.1 0 -0 0</pose>
+      <parent>left_shin</parent>
+      <child>left_ankle_link</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1.57</lower>
+          <upper>1.57</upper>
+          <effort>20</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.5</damping>
+          <friction>0.3</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='left_ankle_link'>
+      <pose relative_to='left_ankle_joint1'>0 0 0 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.1</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.1</iyy>
+          <iyz>0</iyz>
+          <izz>0.1</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='left_ankle_joint2' type='revolute'>
+      <pose relative_to='left_ankle_link'>0 0 -0.1 0 -0 0</pose>
+      <parent>left_ankle_link</parent>
+      <child>left_foot</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.57</lower>
+          <upper>1.57</upper>
+          <effort>20</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.5</damping>
+          <friction>0.3</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='left_foot'>
+      <pose relative_to='left_ankle_joint2'>0 0 0 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>0.02</mass>
+        <inertia>
+          <ixx>0.1</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.1</iyy>
+          <iyz>0</iyz>
+          <izz>0.1</izz>
+        </inertia>
+      </inertial>
+      <collision name='left_foot_collision_collision'>
+        <pose>0 0 -0.005 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.05 0.04 0.01</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name='left_foot_visual'>
+        <pose>0 0 -0.005 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.05 0.04 0.01</size>
+          </box>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='right_hip_joint1' type='revolute'>
+      <pose relative_to='dummy'>0 -0.04 -0.03 0 -0 0</pose>
+      <parent>dummy</parent>
+      <child>right_hip_link</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.57</lower>
+          <upper>1.57</upper>
+          <effort>20</effort>
+          <velocity>1.5</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.5</damping>
+          <friction>0.3</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='right_hip_link'>
+      <pose relative_to='right_hip_joint1'>0 0 0 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.1</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.1</iyy>
+          <iyz>0</iyz>
+          <izz>0.1</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='right_hip_joint2' type='revolute'>
+      <pose relative_to='right_hip_link'>0 0 -0.03 0 -0 0</pose>
+      <parent>right_hip_link</parent>
+      <child>right_thigh</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1.57</lower>
+          <upper>1.57</upper>
+          <effort>20</effort>
+          <velocity>1.5</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.5</damping>
+          <friction>0.3</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='right_thigh'>
+      <pose relative_to='right_hip_joint2'>0 0 0 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>0.16</mass>
+        <inertia>
+          <ixx>0.1</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.1</iyy>
+          <iyz>0</iyz>
+          <izz>0.1</izz>
+        </inertia>
+      </inertial>
+      <collision name='right_thigh_collision_collision'>
+        <pose>0 0 -0.05 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.1</length>
+            <radius>0.01</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='right_thigh_visual'>
+        <pose>0 0 -0.05 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.1</length>
+            <radius>0.01</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='right_knee_joint' type='revolute'>
+      <pose relative_to='right_thigh'>0 0 -0.1 0 -0 0</pose>
+      <parent>right_thigh</parent>
+      <child>right_shin</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.57</upper>
+          <effort>20</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.5</damping>
+          <friction>0.3</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='right_shin'>
+      <pose relative_to='right_knee_joint'>0 0 0 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>0.16</mass>
+        <inertia>
+          <ixx>0.1</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.1</iyy>
+          <iyz>0</iyz>
+          <izz>0.1</izz>
+        </inertia>
+      </inertial>
+      <collision name='right_shin_collision_collision'>
+        <pose>0 0 -0.05 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.1</length>
+            <radius>0.01</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='right_shin_visual'>
+        <pose>0 0 -0.05 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.1</length>
+            <radius>0.01</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='right_ankle_joint1' type='revolute'>
+      <pose relative_to='right_shin'>0 0 -0.1 0 -0 0</pose>
+      <parent>right_shin</parent>
+      <child>right_ankle_link</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1.57</lower>
+          <upper>1.57</upper>
+          <effort>20</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.5</damping>
+          <friction>0.3</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='right_ankle_link'>
+      <pose relative_to='right_ankle_joint1'>0 0 0 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.1</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.1</iyy>
+          <iyz>0</iyz>
+          <izz>0.1</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='right_ankle_joint2' type='revolute'>
+      <pose relative_to='right_ankle_link'>0 0 -0.1 0 -0 0</pose>
+      <parent>right_ankle_link</parent>
+      <child>right_foot</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.57</lower>
+          <upper>1.57</upper>
+          <effort>20</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.5</damping>
+          <friction>0.3</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='right_foot'>
+      <pose relative_to='right_ankle_joint2'>0 0 0 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>0.02</mass>
+        <inertia>
+          <ixx>0.1</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.1</iyy>
+          <iyz>0</iyz>
+          <izz>0.1</izz>
+        </inertia>
+      </inertial>
+      <collision name='right_foot_collision_collision'>
+        <pose>0 0 -0.005 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.05 0.04 0.01</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name='right_foot_visual'>
+        <pose>0 0 -0.005 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.05 0.04 0.01</size>
+          </box>
+        </geometry>
+      </visual>
+    </link>
+    <static>0</static>
+    <plugin name='gazebo_ros_control' filename='libgazebo_ros_control.so'/>
+  </model>
+</sdf>

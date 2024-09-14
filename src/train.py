@@ -5,9 +5,9 @@ import numpy as np
 
 env = Environment("robot", [0, 0, 0.3])
 
-n_actions = 4
-action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.2 * np.ones(n_actions))
-model = DDPG("MlpPolicy", env, verbose=1, learning_rate=0.0003, )
+n_actions = 6
+action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.066*np.ones(n_actions))
+model = DDPG("MlpPolicy", env, verbose=1, learning_rate=0.003, action_noise=action_noise)
 # model = DDPG.load("../models/weights1", env=env)
 
 model.learn(total_timesteps=1000000)
