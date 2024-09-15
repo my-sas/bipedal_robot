@@ -6,7 +6,7 @@ from gymnasium import spaces
 import numpy as np
 import time
 import rospy
-from ros_bridge import Spawner, JointListener, LinkListener, EffortPublisher, VelocityListener, Reloader, reset_simulation
+from ros_bridge import Spawner, JointListener, LinkListener, EffortPublisher, VelocityListener, ContactListener, Reloader, reset_simulation
 
 
 class Environment(gym.Env):
@@ -40,6 +40,7 @@ class Environment(gym.Env):
                 -1.5, -1.5, -1.5, -1.5, -1.5,  # right low leg joint velocities
                 -1.1, -1.1, -1.1,  # root link low velocity
                 -1., -1., -1., -1., -1., -1., -1., -1., -1., -1.  # low previous action
+
             ]),
             high=np.array([
                 0.78, 1.57, 1.57, 0.52, 0.52,  # left leg high joint positions
@@ -56,7 +57,7 @@ class Environment(gym.Env):
         self.rate = rospy.Rate(60)  # rate of actions
         self.step_n = 0  # step counter
         self.max_step = 10000  # max length of episode
-        self.min_height = 0.11
+        self.min_height = 1.
         self.pose = pose  # initial coordinates
 
         # initialize ros interfaces
@@ -68,12 +69,13 @@ class Environment(gym.Env):
         self.link_listener = LinkListener(name)
         self.effort_publisher = EffortPublisher(name)
         self.velocity_listener = VelocityListener(name)
-        # self.contact_listener = ContactListener(name)
+        self.left_foot_contact_listener = ContactListener(name, "left_foot")
+        self.right_foot_contact_listener = ContactListener(name, "right_foot")
         self.reloader = Reloader(name, self.pose)
 
     def reward_func(self, v, h, efforts, step_n):
         # print(f"{h*0.9:.3f} {np.abs(efforts).sum()*0.016:.3f} {v*0.5:.3f}")
-        return -(1.1 + h * 0.9)
+        return -(1.1 + h * 1.9 - np.abs(efforts).sum()/20)
         # return -(v*0.5 + 1.1 + h*0.9 - np.abs(efforts).sum()*0.016)
 
     def is_done(self, h):
@@ -84,7 +86,7 @@ class Environment(gym.Env):
         self.step_n += 1
 
         # do action
-        self.effort_publisher.send(action * 10)
+        self.effort_publisher.send(action * 20)
 
         # get observation data
         joint_data = self.joint_listener.get_data()

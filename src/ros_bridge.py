@@ -14,7 +14,7 @@ import rospkg
 from gazebo_msgs.srv import GetLinkState
 from sensor_msgs.msg import JointState
 from gazebo_msgs.msg import ModelStates
-# from gazebo_msgs.msg import ContactsState
+from gazebo_msgs.msg import ContactsState
 from std_msgs.msg import Float64
 
 from gazebo_msgs.srv import SetModelStateRequest
@@ -131,19 +131,25 @@ class Spawner:
         time.sleep(2)
 
 
+class ContactListener:
+    def __init__(self, name, link):
+        rospy.Subscriber(f"/{name}/{link}_contact", ContactsState, self.callback, queue_size=100)
+        self.contacts = None
 
-# cant do this class yet
-# class ContactListener:
-#     def __init__(self):
-#         rospy.Subscriber("/gazebo/base_collision", ContactsState, self.callback)
-#         self.contacts = None
-#
-#     def callback(self, data):
-#         self.contacts = data
-#         # self.contacts = [[force for force in contact]  for contact in data.states]
-#
-#     def get_data(self):
-#         return self.contacts
+    def callback(self, data):
+        self.contacts = data.states
+        # self.contacts = np.array([
+        #     data.states.total_wrench.force.x, data.states.total_wrench.force.y, data.states.total_wrench.force.z,
+        #     data.states.total_wrench.torque.x, data.states.total_wrench.torque.y, data.states.total_wrench.torque.z
+        # ])
+
+    def get_data(self):
+        return self.contacts
+
+
+
+
+
 
 
 # class Spawner:
@@ -191,11 +197,6 @@ class Spawner:
 #     def delete_model(self):
 #         response = self.service(model_name)
 #         print(response.status_message)
-
-
-# class Launcher:
-#     def __init__(self):
-
 
 
 class Reloader:

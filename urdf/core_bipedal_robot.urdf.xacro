@@ -1,10 +1,17 @@
 <?xml version="1.0"?>
 <robot name="bipedal_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:property name="torso_height" value="0.7"/>
+    <xacro:property name="torso_width" value="0.7"/>
+    <xacro:property name="thigh_len" value="0.6"/>
+    <xacro:property name="shin_len" value="0.6"/>
+    <xacro:property name="foot_thickness" value="0.08"/>
+
+    <!-- Base link -->
 	<link name="base_link">
 		<visual>
 			<origin xyz="0 0 0" rpy="0 0 0"/>
 			<geometry>
-				<box size="0.05 0.08 0.08" />
+				<box size="0.3 ${torso_width} ${torso_height}"/>
 			</geometry>
 			<material name="blue">
 				<color rgba="0 0 1 1"/>
@@ -13,16 +20,17 @@
 		<collision name="base_link">
 		    <origin xyz="0 0 0" rpy="0 0 0"/>
 			<geometry>
-				<box size="0.05 0.08 0.08" />
+				<box size="0.3 0.7 ${torso_height}"/>
 			</geometry>
 		</collision>
 		<inertial>
-            <mass value="0.16"/>
+            <mass value="1.5"/>
 		    <origin xyz="0 0 0"/>
 		    <inertia ixx="0.1" ixy="0.0" ixz="0.0" iyy="0.1" iyz="0.0" izz="0.1"/>
 		</inertial>
 	</link>
 
+	<!-- Leg links and joints -->
 	<xacro:macro name="leg" params="name shift hip_left_limit hip_right_limit">
 	    <link name="${name}_hip_link">
 	        <inertial>
@@ -34,46 +42,46 @@
 
         <link name="${name}_thigh">
             <visual>
-                <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+                <origin xyz="0 0 ${-thigh_len/2}" rpy="0 0 0"/>
                 <geometry>
-                    <cylinder radius="0.01" length="0.1"/>
+                    <cylinder radius="0.07" length="${thigh_len}"/>
                 </geometry>
                 <material name="blue">
                     <color rgba="0 0 1 1"/>
                 </material>
             </visual>
             <collision name="${name}_thigh_collision">
-                <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+                <origin xyz="0 0 ${-thigh_len/2}" rpy="0 0 0"/>
                 <geometry>
-                    <cylinder radius="0.01" length="0.1"/>
+                    <cylinder radius="0.07" length="${thigh_len}"/>
                 </geometry>
             </collision>
             <inertial>
-                <mass value="0.16"/>
-                <origin xyz="0 0 -0.05"/>
+                <mass value="2.5"/>
+                <origin xyz="0 0 0"/>
                 <inertia ixx="0.1" ixy="0.0" ixz="0.0" iyy="0.1" iyz="0.0" izz="0.1"/>
             </inertial>
         </link>
 
         <link name="${name}_shin">
             <visual>
-                <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+                <origin xyz="0 0 ${-shin_len/2}" rpy="0 0 0"/>
                 <geometry>
-                    <cylinder radius="0.01" length="0.1"/>
+                    <cylinder radius="0.07" length="${shin_len}"/>
                 </geometry>
                 <material name="blue">
                     <color rgba="0 0 1 1"/>
                 </material>
             </visual>
             <collision name="${name}_shin_collision">
-                <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+                <origin xyz="0 0 ${-shin_len/2}" rpy="0 0 0"/>
                 <geometry>
-                    <cylinder radius="0.01" length="0.1"/>
+                    <cylinder radius="0.07" length="${shin_len}"/>
                 </geometry>
             </collision>
             <inertial>
-                <mass value="0.16"/>
-                <origin xyz="0 0 -0.05"/>
+                <mass value="2"/>
+                <origin xyz="0 0 0"/>
                 <inertia ixx="0.1" ixy="0.0" ixz="0.0" iyy="0.1" iyz="0.0" izz="0.1"/>
             </inertial>
         </link>
@@ -88,23 +96,23 @@
 
         <link name="${name}_foot">
             <visual>
-                <origin xyz="0 0 -0.005" rpy="0 0 0"/>
+                <origin xyz="0 0 ${-foot_thickness/2}" rpy="0 0 0"/>
                 <geometry>
-                    <box size="0.05 0.04 0.01" />
+                    <box size="0.45 0.3 ${foot_thickness}" />
                 </geometry>
                 <material name="blue">
                     <color rgba="0 0 1 1"/>
                 </material>
             </visual>
             <collision name="${name}_foot_collision">
-                <origin xyz="0 0 -0.005" rpy="0 0 0"/>
+                <origin xyz="0 0 ${-foot_thickness/2}" rpy="0 0 0"/>
                 <geometry>
-                    <box size="0.05 0.04 0.01" />
+                    <box size="0.45 0.3 ${foot_thickness}" />
                 </geometry>
             </collision>
             <inertial>
-                <mass value="0.02"/>
-                <origin xyz="0 0 -0.005"/>
+                <mass value="1"/>
+                <origin xyz="0 0 0"/>
                 <inertia ixx="0.1" ixy="0.0" ixz="0.0" iyy="0.1" iyz="0.0" izz="0.1"/>
             </inertial>
         </link>
@@ -112,10 +120,9 @@
         <joint name="${name}_hip_joint1" type="revolute">
             <parent link="base_link"/>
             <child link="${name}_hip_link"/>
-            <origin xyz="0 ${shift} -0.03" rpy="0 0 0"/>
+            <origin xyz="0 ${shift} ${-torso_height/2}" rpy="0 0 0"/>
             <axis xyz="1 0 0"/>
-            <limit lower="${hip_left_limit}" upper="${hip_right_limit}" effort="20" velocity="1.5"/>
-            <dynamics damping="0.5" friction="0.3"/>
+            <limit lower="${hip_left_limit}" upper="${hip_right_limit}" effort="20" velocity="10"/>
         </joint>
 
         <joint name="${name}_hip_joint2" type="revolute">
@@ -123,26 +130,23 @@
             <child link="${name}_thigh"/>
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <axis xyz="0 1 0"/>
-            <limit lower="-1.57" upper="1.57" effort="20" velocity="1.5"/>
-            <dynamics damping="0.5" friction="0.3"/>
+            <limit lower="-1.57" upper="1.57" effort="20" velocity="10"/>
         </joint>
 
         <joint name="${name}_knee_joint" type="revolute">
             <parent link="${name}_thigh"/>
             <child link="${name}_shin"/>
-            <origin xyz="0 0 -0.1" rpy="0 0 0"/>
+            <origin xyz="0 0 ${-thigh_len}" rpy="0 0 0"/>
             <axis xyz="0 1 0"/>
-            <limit lower="0.0" upper="1.57" effort="20" velocity="1"/>
-            <dynamics damping="0.5" friction="0.3"/>
+            <limit lower="0.0" upper="1.57" effort="20" velocity="10"/>
         </joint>
 
         <joint name="${name}_ankle_joint1" type="revolute">
             <parent link="${name}_shin"/>
             <child link="${name}_ankle_link"/>
-            <origin xyz="0 0 -0.1" rpy="0 0 0"/>
+            <origin xyz="0 0 ${-shin_len}" rpy="0 0 0"/>
             <axis xyz="0 1 0"/>
-            <limit lower="-1.05" upper="0.52" effort="20" velocity="1"/>
-            <dynamics damping="0.5" friction="0.3"/>
+            <limit lower="-1.05" upper="0.52" effort="20" velocity="10"/>
         </joint>
 
         <joint name="${name}_ankle_joint2" type="revolute">
@@ -150,11 +154,10 @@
             <child link="${name}_foot"/>
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <axis xyz="1 0 0"/>
-            <limit lower="-0.52" upper="0.52" effort="20" velocity="1"/>
-            <dynamics damping="0.5" friction="0.3"/>
+            <limit lower="-0.52" upper="0.52" effort="20" velocity="10"/>
         </joint>
 	</xacro:macro>
 
-	<xacro:leg name="left" shift="0.04" hip_left_limit="-0.26" hip_right_limit="0.78"/>
-	<xacro:leg name="right" shift="-0.04" hip_left_limit="-0.78" hip_right_limit="0.26"/>
+	<xacro:leg name="left" shift="${torso_width/2}" hip_left_limit="-0.26" hip_right_limit="0.78"/>
+	<xacro:leg name="right" shift="${-torso_width/2}" hip_left_limit="-0.78" hip_right_limit="0.26"/>
 </robot>
