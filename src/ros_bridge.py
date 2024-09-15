@@ -80,9 +80,9 @@ class EffortPublisher:
     def __init__(self, name):
         self.name = name
         joints = [
-            'left_hip_joint', 'right_hip_joint',
-            'left_knee_joint', 'right_knee_joint',
-            'left_ankle_joint', 'right_ankle_joint']
+            "left_hip_joint1", "left_hip_joint2", "left_knee_joint", "left_ankle_joint1", "left_ankle_joint2",
+            "right_hip_joint1", "right_hip_joint2", "right_knee_joint", "right_ankle_joint1", "right_ankle_joint2"
+        ]
         joints = [f'/{name}/{join}_effort_controller/command' for join in joints]
         
         self.pub = []
