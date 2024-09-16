@@ -123,6 +123,7 @@
             <origin xyz="0 ${shift} ${-torso_height/2}" rpy="0 0 0"/>
             <axis xyz="1 0 0"/>
             <limit lower="${hip_left_limit}" upper="${hip_right_limit}" effort="20" velocity="10"/>
+            <dynamics damping="0.02" friction="0.1"/>
         </joint>
 
         <joint name="${name}_hip_joint2" type="revolute">
@@ -131,6 +132,7 @@
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <axis xyz="0 1 0"/>
             <limit lower="-1.57" upper="1.57" effort="20" velocity="10"/>
+            <dynamics damping="0.02" friction="0.1"/>
         </joint>
 
         <joint name="${name}_knee_joint" type="revolute">
@@ -139,6 +141,7 @@
             <origin xyz="0 0 ${-thigh_len}" rpy="0 0 0"/>
             <axis xyz="0 1 0"/>
             <limit lower="0.0" upper="1.57" effort="20" velocity="10"/>
+            <dynamics damping="0.02" friction="0.1"/>
         </joint>
 
         <joint name="${name}_ankle_joint1" type="revolute">
@@ -147,6 +150,7 @@
             <origin xyz="0 0 ${-shin_len}" rpy="0 0 0"/>
             <axis xyz="0 1 0"/>
             <limit lower="-1.05" upper="0.52" effort="20" velocity="10"/>
+            <dynamics damping="0.02" friction="0.1"/>
         </joint>
 
         <joint name="${name}_ankle_joint2" type="revolute">
@@ -155,6 +159,7 @@
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <axis xyz="1 0 0"/>
             <limit lower="-0.52" upper="0.52" effort="20" velocity="10"/>
+            <dynamics damping="0.02" friction="0.1"/>
         </joint>
 	</xacro:macro>
 

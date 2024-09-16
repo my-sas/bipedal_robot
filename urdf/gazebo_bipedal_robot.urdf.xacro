@@ -24,8 +24,8 @@
 
 	<xacro:macro name="contact" params="link">
         <gazebo reference="${link}">
-            <mu1>100000.0</mu1>
-            <mu2>100000.0</mu2>
+            <mu1>0.08</mu1>
+            <mu2>0.08</mu2>
             <material>Gazebo/White</material>
         </gazebo>
 	</xacro:macro>
@@ -61,7 +61,7 @@
             <contact>
                 <collision>left_foot_collision_collision</collision>
             </contact>
-            <plugin name="left_foot_plugin" filename="libgazebo_ros_bumper.so">
+            <plugin name="gazebo_ros_bumper_plugin" filename="libgazebo_ros_bumper.so">
                 <bumperTopicName>left_foot_contact</bumperTopicName>
                 <frameName>left_foot</frameName>
             </plugin>
@@ -74,7 +74,7 @@
             <contact>
                 <collision>right_foot_collision_collision</collision>
             </contact>
-            <plugin name="right_foot_plugin" filename="libgazebo_ros_bumper.so">
+            <plugin name="gazebo_ros_bumper_plugin" filename="libgazebo_ros_bumper.so">
                 <bumperTopicName>right_foot_contact</bumperTopicName>
                 <frameName>right_foot</frameName>
             </plugin>

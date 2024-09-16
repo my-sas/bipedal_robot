@@ -8,9 +8,6 @@ import numpy as np
 import subprocess
 
 import rospy
-import rospkg
-# from gazebo_msgs.srv import SpawnModel
-# from gazebo_msgs.srv import DeleteModel
 from gazebo_msgs.srv import GetLinkState
 from sensor_msgs.msg import JointState
 from gazebo_msgs.msg import ModelStates
@@ -32,16 +29,6 @@ from std_srvs.srv import Empty
 # from gazebo_msgs.msg import ModelState
 # from gazebo_msgs.srv import GetModelState, GetModelStateRequest
 # from controller_manager_msgs.srv import SwitchController
-
-# rospy.init_node("ros_bridge", anonymous=True)
-
-
-PACKAGE_PATH = rospkg.RosPack().get_path("bipedal_robot")  # path to ros package
-URDF_PATH = PACKAGE_PATH + "/urdf/full_bipedal_robot.urdf"  # path to urdf models
-N_MODELS = 8  # number of models to spawn
-BASE_NAME = "robot"  # model names will be robot1, robot2, etc
-SPACE = 10.  # space between robots along y-axis
-INIT_POSE = [0., 0., 1.]  # coordinates of model base link
 
 
 class LinkListener:
@@ -65,11 +52,11 @@ class LinkListener:
 
 class JointListener:
     def __init__(self, name):
-        rospy.Subscriber(f"/{name}/joint_states", JointState, self.callback, queue_size=100)
+        rospy.Subscriber(f"/{name}/joint_states", JointState, self.callback, queue_size=10)
         self.joint_states = None
 
     def callback(self, data):
-        # rospy.loginfo("Data: %s", data)
+        # rospy.loginfo(f"Joint states updated: {data.position}")
         self.joint_states = np.array(list(data.position) + list(data.velocity))
 
     def get_data(self):
@@ -133,142 +120,141 @@ class Spawner:
 
 class ContactListener:
     def __init__(self, name, link):
-        rospy.Subscriber(f"/{name}/{link}_contact", ContactsState, self.callback, queue_size=100)
+        rospy.Subscriber(f"/{name}/{link}_contact", ContactsState, self.callback)
         self.contacts = None
 
     def callback(self, data):
-        self.contacts = data.states
-        # self.contacts = np.array([
-        #     data.states.total_wrench.force.x, data.states.total_wrench.force.y, data.states.total_wrench.force.z,
-        #     data.states.total_wrench.torque.x, data.states.total_wrench.torque.y, data.states.total_wrench.torque.z
-        # ])
+        if len(data.states) != 0:
+            self.contacts = np.array([
+                data.states[0].total_wrench.force.x,
+                data.states[0].total_wrench.force.y,
+                data.states[0].total_wrench.force.z,
+                data.states[0].total_wrench.torque.x,
+                data.states[0].total_wrench.torque.y,
+                data.states[0].total_wrench.torque.z
+            ])
+        else:
+            return np.zeros(6)
 
     def get_data(self):
         return self.contacts
 
 
-
-
-
-
-
-# class Spawner:
-#     def __init__(self, base_name, n_models, init_pose, space):
-#         rospy.wait_for_service('gazebo/spawn_urdf_model')
-#         self.service = rospy.ServiceProxy('gazebo/spawn_urdf_model', SpawnModel)
-#         self.base_name = base_name
-#         self.n_models = n_models
-#         self.init_pose = init_pose
-#         self.space = space
-#
-#         self.names = [base_name + str(i) for i in range(n_models)]
-#         self.poses = []
-#         for i in range(n_models):
-#             pose = init_pose.copy()
-#             pose[1] += space
-#             self.poses.append(pose)
-#
-#     def spawn_model(self, name, pose):
-#         spawn = rospy.ServiceProxy('gazebo/spawn_urdf_model', SpawnModel)
-#         # open urdf file
-#         with open(URDF_PATH, 'r') as file:
-#             robot_urdf = file.read()
-#
-#         # define initial pose of the model
-#         initial_pose = Pose()
-#         initial_pose.position.x = pose[0]
-#         initial_pose.position.y = pose[1]
-#         initial_pose.position.z = pose[2]  # height above ground
-#
-#         # call the service to spawn the model
-#         response = self.service(name, robot_urdf, "", initial_pose, "world")
-#         print("Spawn status:", response.success, response.status_message)
-#
-#     def spawn_models(self):
-#         for name, pose in zip(self.names, self.poses):
-#             self.spawn_model(name, pose)
-
-
-# class Despawner:
-#     def __init__(self):
-#         rospy.wait_for_service('/gazebo/delete_model')
-#         self.service = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
-#
-#     def delete_model(self):
-#         response = self.service(model_name)
-#         print(response.status_message)
-
-
 class Reloader:
     def __init__(self, name, pose):
-        self.name = name
+        self.joint_name_lst = [
+            "left_hip_joint1", "left_hip_joint2", "left_knee_joint", "left_ankle_joint1", "left_ankle_joint2",
+            "right_hip_joint1", "right_hip_joint2", "right_knee_joint", "right_ankle_joint1", "right_ankle_joint2"
+        ]
+        self.starting_pos = np.array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0.])
 
-        self.state_service = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
-        self.config_service = rospy.ServiceProxy('/gazebo/set_model_configuration', SetModelConfiguration)
-
-        self.effort_pub = EffortPublisher(name)
-
-        # initial coordinates
-        self.coordinates = Pose()
-        self.coordinates.position.x = pose[0]
-        self.coordinates.position.y = pose[1]
-        self.coordinates.position.z = pose[2]
-        self.coordinates.orientation.x = 0
-        self.coordinates.orientation.y = 0
-        self.coordinates.orientation.z = 0
-        self.coordinates.orientation.w = 0
-        self.position = ModelState()
-        self.position.model_name = self.name
-        self.position.pose = self.coordinates
-
-        # initial joint angles
-        self.joint_state = SetModelConfigurationRequest()
-        self.joint_state.model_name = name
-        self.joint_state.urdf_param_name = 'robot_description'
-        self.joint_state.joint_names = ['left_knee_joint', 'left_knee_joint', 'right_hip_joint', 'right_knee_joint']
-        self.joint_state.joint_positions = np.array([0., 0., 0., 0.])
-
-        # self.joint_publisher = rospy.Publisher(f"/{name}/joint_states", JointState, queue_size=10)
-        # self.joint_pose = JointState()
-        # self.joint_pose.name = ['left_hip_joint', 'right_hip_joint', 'left_knee_joint', 'right_knee_joint']
-        # self.joint_pose.position = [0., 0., 0., 0.]
-
-        self.switch_service = rospy.ServiceProxy('/effort_controller_spawner/switch_controller', SwitchController)
-        self.controllers = [f"/{name}/left_hip_joint_effort_controller/",
-                            f"/{name}/left_knee_joint_effort_controller/",
-                            f"/{name}/right_hip_joint_effort_controller/",
-                            f"/{name}/right_knee_joint_effort_controller/"]
-
-    def restart_controllers(self):
-        rospy.wait_for_service('/effort_controller_spawner/switch_controller')
-        self.switch_service(stop_controllers=self.controllers, start_controllers=[], strictness=2)
-
-        rospy.wait_for_service('/effort_controller_spawner/switch_controller')
-        self.switch_service(stop_controllers=[], start_controllers=self.controllers, strictness=2)
+        self.pause_proxy = rospy.ServiceProxy('/gazebo/pause_physics', Empty)
+        self.unpause_proxy = rospy.ServiceProxy('/gazebo/unpause_physics', Empty)
+        self.model_config_proxy = rospy.ServiceProxy('/gazebo/set_model_configuration', SetModelConfiguration)
+        self.model_config_req = SetModelConfigurationRequest()
+        self.model_config_req.model_name = name
+        self.model_config_req.urdf_param_name = 'robot_description'
+        self.model_config_req.joint_names = self.joint_name_lst
+        self.model_config_req.joint_positions = self.starting_pos
+        self.model_state_proxy = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
+        self.model_state_req = SetModelStateRequest()
+        self.model_state_req.model_state = ModelState()
+        self.model_state_req.model_state.model_name = name
+        self.model_state_req.model_state.pose.position.x = pose[0]
+        self.model_state_req.model_state.pose.position.y = pose[1]
+        self.model_state_req.model_state.pose.position.z = pose[2]
+        self.model_state_req.model_state.pose.orientation.x = 0.0
+        self.model_state_req.model_state.pose.orientation.y = 0.0
+        self.model_state_req.model_state.pose.orientation.z = 0.0
+        self.model_state_req.model_state.pose.orientation.w = 0.0
+        self.model_state_req.model_state.twist.linear.x = 0.0
+        self.model_state_req.model_state.twist.linear.y = 0.0
+        self.model_state_req.model_state.twist.linear.z = 0.0
+        self.model_state_req.model_state.twist.angular.x = 0.0
+        self.model_state_req.model_state.twist.angular.y = 0.0
+        self.model_state_req.model_state.twist.angular.z = 0.0
+        self.model_state_req.model_state.reference_frame = 'world'
 
     def reload(self):
-        self.restart_controllers()
+        rospy.wait_for_service('/gazebo/pause_physics')
+        self.pause_proxy()
 
         rospy.wait_for_service('/gazebo/set_model_state')
-        response = self.state_service(self.position)
+        self.model_state_proxy(self.model_state_req)
 
         rospy.wait_for_service('/gazebo/set_model_configuration')
-        response = self.config_service(self.joint_state)
+        self.model_config_proxy(self.model_config_req)
 
-        # self.joint_pose.header.stamp = rospy.Time.now()
-        # self.joint_publisher.publish(self.joint_pose)
+        rospy.wait_for_service('/gazebo/unpause_physics')
+        self.unpause_proxy()
 
-        rospy.wait_for_service('/gazebo/set_model_state')
-        # rospy.wait_for_service(f"/{self.name}/joint_states")
-        rospy.wait_for_service('/gazebo/set_model_configuration')
-        # rospy.sleep(3)
-
-def wait_for_reset():
-    rospy.wait_for_service('node_ready')
-    ready_service = rospy.ServiceProxy('node_ready', ReadySignal)
-    resp = ready_service()
+        rospy.sleep(0.5)
 
 
+
+# class Reloader:
+#     def __init__(self, name, pose):
+#         self.name = name
+#
+#         self.state_service = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
+#         self.config_service = rospy.ServiceProxy('/gazebo/set_model_configuration', SetModelConfiguration)
+#
+#         self.effort_pub = EffortPublisher(name)
+#
+#         # initial coordinates
+#         self.coordinates = Pose()
+#         self.coordinates.position.x = pose[0]
+#         self.coordinates.position.y = pose[1]
+#         self.coordinates.position.z = pose[2]
+#         self.coordinates.orientation.x = 0
+#         self.coordinates.orientation.y = 0
+#         self.coordinates.orientation.z = 0
+#         self.coordinates.orientation.w = 0
+#         self.position = ModelState()
+#         self.position.model_name = self.name
+#         self.position.pose = self.coordinates
+#
+#         # initial joint angles
+#         self.joint_state = SetModelConfigurationRequest()
+#         self.joint_state.model_name = name
+#         self.joint_state.urdf_param_name = 'robot_description'
+#         self.joint_state.joint_names = ['left_knee_joint', 'left_knee_joint', 'right_hip_joint', 'right_knee_joint']
+#         self.joint_state.joint_positions = np.array([0., 0., 0., 0.])
+#
+#         # self.joint_publisher = rospy.Publisher(f"/{name}/joint_states", JointState, queue_size=10)
+#         # self.joint_pose = JointState()
+#         # self.joint_pose.name = ['left_hip_joint', 'right_hip_joint', 'left_knee_joint', 'right_knee_joint']
+#         # self.joint_pose.position = [0., 0., 0., 0.]
+#
+#         self.switch_service = rospy.ServiceProxy('/effort_controller_spawner/switch_controller', SwitchController)
+#         self.controllers = [f"/{name}/left_hip_joint_effort_controller/",
+#                             f"/{name}/left_knee_joint_effort_controller/",
+#                             f"/{name}/right_hip_joint_effort_controller/",
+#                             f"/{name}/right_knee_joint_effort_controller/"]
+#
+#     def restart_controllers(self):
+#         rospy.wait_for_service('/effort_controller_spawner/switch_controller')
+#         self.switch_service(stop_controllers=self.controllers, start_controllers=[], strictness=2)
+#
+#         rospy.wait_for_service('/effort_controller_spawner/switch_controller')
+#         self.switch_service(stop_controllers=[], start_controllers=self.controllers, strictness=2)
+#
+#     def reload(self):
+#         self.restart_controllers()
+#
+#         rospy.wait_for_service('/gazebo/set_model_state')
+#         response = self.state_service(self.position)
+#
+#         rospy.wait_for_service('/gazebo/set_model_configuration')
+#         response = self.config_service(self.joint_state)
+#
+#         # self.joint_pose.header.stamp = rospy.Time.now()
+#         # self.joint_publisher.publish(self.joint_pose)
+#
+#         rospy.wait_for_service('/gazebo/set_model_state')
+#         # rospy.wait_for_service(f"/{self.name}/joint_states")
+#         rospy.wait_for_service('/gazebo/set_model_configuration')
+#         # rospy.sleep(3)
 
 
 def reset_simulation():

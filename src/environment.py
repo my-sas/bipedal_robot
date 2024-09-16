@@ -35,35 +35,43 @@ class Environment(gym.Env):
         self.observation_space = spaces.Box(
             low=np.array([
                 -0.26, -1.57, 0, -1.05, -0.52,  # left leg low joint positions
+                -0.78, -1.57, 0, -1.05, -0.52,  # right leg low joint positions
                 -1.5, -1.5, -1.5, -1.5, -1.5,  # left leg low joint velocities
-                -0.26, -1.57, 0, -1.05, -0.52,  # right leg low joint positions
                 -1.5, -1.5, -1.5, -1.5, -1.5,  # right low leg joint velocities
-                -1.1, -1.1, -1.1,  # root link low velocity
-                -1., -1., -1., -1., -1., -1., -1., -1., -1., -1.  # low previous action
+                -2.1, -2.1, -2.1,  # root link low velocity
+                -1., -1., -1., -1., -1., -1., -1., -1., -1., -1.,  # low previous action
+                float("-inf"), float("-inf"), float("-inf"),
+                float("-inf"), float("-inf"), float("-inf"),
+                float("-inf"), float("-inf"), float("-inf"),
+                float("-inf"), float("-inf"), float("-inf")
 
             ]),
             high=np.array([
                 0.78, 1.57, 1.57, 0.52, 0.52,  # left leg high joint positions
+                0.26, 1.57, 1.57, 0.52, 0.52,  # right leg high joint positions
                 1.5, 1.5, 1.5, 1.5, 1.5,  # left leg high joint velocities
-                0.78, 1.57, 1.57, 0.52, 0.52,  # right leg high joint positions
                 1.5, 1.5, 1.5, 1.5, 1.5,  # right leg high joint velocities
-                1.1, 1.1, 1.1,  # root link high velocity
-                1., 1., 1., 1., 1., 1., 1., 1., 1., 1.  # high previous action
+                2.1, 2.1, 2.1,  # root link high velocity
+                1., 1., 1., 1., 1., 1., 1., 1., 1., 1.,  # high previous action
+                float("inf"), float("inf"), float("inf"),
+                float("inf"), float("inf"), float("inf"),
+                float("inf"), float("inf"), float("inf"),
+                float("inf"), float("inf"), float("inf")
             ]),
-            shape=(33,), dtype=np.float32)
+            shape=(45,), dtype=np.float32)
         self.prev_action = np.zeros(10)
 
         # other environment parameters
-        self.rate = rospy.Rate(60)  # rate of actions
+        self.rate = rospy.Rate(45)  # rate of actions
         self.step_n = 0  # step counter
         self.max_step = 10000  # max length of episode
-        self.min_height = 1.
+        self.min_height = 0.5
         self.pose = pose  # initial coordinates
 
         # initialize ros interfaces
         self.spawner = Spawner(name)
         self.spawner.spawn(self.pose)
-        time.sleep(2)
+        rospy.sleep(5)
 
         self.joint_listener = JointListener(name)
         self.link_listener = LinkListener(name)
@@ -71,19 +79,17 @@ class Environment(gym.Env):
         self.velocity_listener = VelocityListener(name)
         self.left_foot_contact_listener = ContactListener(name, "left_foot")
         self.right_foot_contact_listener = ContactListener(name, "right_foot")
-        self.reloader = Reloader(name, self.pose)
+        self.reloader = Reloader(name, pose)
 
-    def reward_func(self, v, h, efforts, step_n):
+    def reward_func(self, v_x, v_y, h, efforts, step_n):
         # print(f"{h*0.9:.3f} {np.abs(efforts).sum()*0.016:.3f} {v*0.5:.3f}")
-        return -(1.1 + h * 1.9 - np.abs(efforts).sum()/20)
-        # return -(v*0.5 + 1.1 + h*0.9 - np.abs(efforts).sum()*0.016)
+        # print(f"{v_x*0.4:.3f} {h*0.9:.3f} {- np.sqrt((efforts**2).sum())/30:.3f} {- np.sqrt(v_y**2)*0.5:.3f}")
+        return v_x*0.4 + 1.1 + h*0.9 - np.sqrt((efforts**2).sum())/30 - np.sqrt(v_y**2)*0.5
 
     def is_done(self, h):
         return (self.step_n > self.max_step) or (h < self.min_height)
 
     def step(self, action):
-        self.rate.sleep()
-        self.step_n += 1
 
         # do action
         self.effort_publisher.send(action * 20)
@@ -92,32 +98,48 @@ class Environment(gym.Env):
         joint_data = self.joint_listener.get_data()
         orientation, coordinates = self.link_listener.get_data("dummy")  # body coordinates
         velocity_data = self.velocity_listener.get_data()
-        # contact_data = self.contact_listener.get_data()  # no contact data yet
+        left_contact_data = self.left_foot_contact_listener.get_data() / 1000
+        right_contact_data = self.right_foot_contact_listener.get_data() / 1000
 
-        self.state = np.concatenate((joint_data, velocity_data, self.prev_action))
-        reward = self.reward_func(velocity_data[0], coordinates[-1], action, self.step_n)  # forward speed, body height
+        # print(f"{coordinates[-1]:.3f} {velocity_data[0]:.3f} {np.abs(action).sum():.3f}")
+        # print(f"{sum(left_contact_data[:3]):.3f}")
+
+        self.state = np.concatenate((
+            joint_data, velocity_data, self.prev_action,
+            left_contact_data, right_contact_data
+        ))
+        reward = self.reward_func(velocity_data[0], velocity_data[1], coordinates[-1], action, self.step_n)  # forward speed, body height
         done = self.is_done(coordinates[-1])  # body height
         info = {}
 
         # update previous action
         self.prev_action = action
 
+        self.step_n += 1
+        self.rate.sleep()
         return self.state, reward, done, False, info
 
     def reset(self, seed=None, options=None):
         print('Episode done')
-        self.effort_publisher.send([0., 0., 0., 0., 0., 0., 0., 0., 0., 0.])
+        self.effort_publisher.send(np.zeros(10))
 
         self.step_n = 0
         self.prev_action = np.zeros(10)
-        reset_simulation()
-        self.effort_publisher.send([0., 0., 0., 0., 0., 0., 0., 0., 0., 0.])
-        # self.reloader.reload()
+
+        # reset_simulation()
+        self.reloader.reload()
+
+        self.effort_publisher.send(np.zeros(10))
 
         joint_data = self.joint_listener.get_data()
         orientation, coordinates = self.link_listener.get_data("dummy")
         velocity_data = self.velocity_listener.get_data()
-        state = np.concatenate((joint_data, velocity_data, self.prev_action))
+        left_contact_data = self.left_foot_contact_listener.get_data() / 1000
+        right_contact_data = self.right_foot_contact_listener.get_data() / 1000
+        state = np.concatenate((
+            joint_data, velocity_data, self.prev_action,
+            left_contact_data, right_contact_data
+        ))
         return state, {}
 
     def close(self):
