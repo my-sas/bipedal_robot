@@ -1,18 +1,30 @@
-from stable_baselines3 import DDPG
-from stable_baselines3.common.noise import NormalActionNoise
-from environment import Environment
 import numpy as np
+from environment import Environment
+from stable_baselines3 import DDPG, PPO
+from stable_baselines3.common.noise import OrnsteinUhlenbeckActionNoise
 
-env = Environment("robot", [0, 0, 1.95])
+env = Environment("robot", [0, 0, 1.7])
 
 n_actions = 10
-action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.001*np.ones(n_actions))
+action_noise = OrnsteinUhlenbeckActionNoise(mean=np.zeros(n_actions), sigma=0.1, theta=0.15)
+policy_kwargs = dict(
+    net_arch=dict(pi=[128, 64, 32], qf=[128, 64, 32])
+)
+
 model = DDPG(
     "MlpPolicy", env,
-    verbose=1, learning_rate=0.001,
-    action_noise=action_noise, buffer_size=100000
+    policy_kwargs=policy_kwargs,gamma=1,
+    action_noise=action_noise
 )
-# model = DDPG.load("../models/weights1", env=env)
 
-model.learn(total_timesteps=1000000)
-# model.save("../models/weights1")
+# model = PPO(
+#     "MlpPolicy", env,
+#     verbose=1, learning_rate=0.001,
+# )
+
+# print(model.policy.actor)
+# print(model.policy.critic)
+# model = PPO.load("../models/weights2.zip", env=env)
+
+model.learn(total_timesteps=2000000)
+model.save("../models/weights3")

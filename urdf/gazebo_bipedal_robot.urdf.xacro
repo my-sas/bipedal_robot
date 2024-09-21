@@ -24,9 +24,10 @@
 
 	<xacro:macro name="contact" params="link">
         <gazebo reference="${link}">
-            <mu1>0.08</mu1>
-            <mu2>0.08</mu2>
-            <material>Gazebo/White</material>
+            <mu1>1.0</mu1>
+            <mu2>1.0</mu2>
+            <minDepth>0.01</minDepth>
+            <maxVel value="20.0"/>
         </gazebo>
 	</xacro:macro>
 
@@ -45,9 +46,9 @@
 	<xacro:contact link="left_thigh"/>
 	<xacro:contact link="left_shin"/>
 	<xacro:contact link="left_foot"/>
-	<xacro:contact link="left_thigh"/>
-	<xacro:contact link="left_shin"/>
-	<xacro:contact link="left_foot"/>
+	<xacro:contact link="right_thigh"/>
+	<xacro:contact link="right_shin"/>
+	<xacro:contact link="right_foot"/>
 
     <gazebo>
         <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">

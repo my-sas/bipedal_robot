@@ -1,12 +1,18 @@
 """This module
 """
 
+import time
+# import logging
+import numpy as np
+import tf.transformations as tft
+
+import rospy
+from ros_bridge import *
+
 import gymnasium as gym
 from gymnasium import spaces
-import numpy as np
-import time
-import rospy
-from ros_bridge import Spawner, JointListener, LinkListener, EffortPublisher, VelocityListener, ContactListener, Reloader, reset_simulation
+
+# logging.basicConfig(filename='../logs/env.log', filemode='a', level=logging.INFO)
 
 
 class Environment(gym.Env):
@@ -15,7 +21,7 @@ class Environment(gym.Env):
 
         # initialize node and set namespace
         self.name = name
-        rospy.init_node(f"{name}_env", anonymous=True, disable_signals=False)
+        rospy.init_node(f"{name}_env")
 
         # define action and observation spaces
         self.state = None  # current robot state
@@ -34,8 +40,9 @@ class Environment(gym.Env):
 
         self.observation_space = spaces.Box(
             low=np.array([
-                -0.26, -1.57, 0, -1.05, -0.52,  # left leg low joint positions
-                -0.78, -1.57, 0, -1.05, -0.52,  # right leg low joint positions
+                -1., -1., -1., -1.,  # orientation
+                -1.57, -0.26, 0, -1.05, -0.52,  # left leg low joint positions
+                -1.57, -0.78, 0, -1.05, -0.52,  # right leg low joint positions
                 -1.5, -1.5, -1.5, -1.5, -1.5,  # left leg low joint velocities
                 -1.5, -1.5, -1.5, -1.5, -1.5,  # right low leg joint velocities
                 -2.1, -2.1, -2.1,  # root link low velocity
@@ -44,11 +51,11 @@ class Environment(gym.Env):
                 float("-inf"), float("-inf"), float("-inf"),
                 float("-inf"), float("-inf"), float("-inf"),
                 float("-inf"), float("-inf"), float("-inf")
-
             ]),
             high=np.array([
-                0.78, 1.57, 1.57, 0.52, 0.52,  # left leg high joint positions
-                0.26, 1.57, 1.57, 0.52, 0.52,  # right leg high joint positions
+                1., 1., 1., 1.,  # orientation
+                0.26, 0.78, 1.57, 0.52, 0.52,  # left leg high joint positions
+                0.26, 0.26, 1.57, 0.52, 0.52,  # right leg high joint positions
                 1.5, 1.5, 1.5, 1.5, 1.5,  # left leg high joint velocities
                 1.5, 1.5, 1.5, 1.5, 1.5,  # right leg high joint velocities
                 2.1, 2.1, 2.1,  # root link high velocity
@@ -58,14 +65,15 @@ class Environment(gym.Env):
                 float("inf"), float("inf"), float("inf"),
                 float("inf"), float("inf"), float("inf")
             ]),
-            shape=(45,), dtype=np.float32)
+            shape=(49,), dtype=np.float32)
         self.prev_action = np.zeros(10)
 
         # other environment parameters
-        self.rate = rospy.Rate(45)  # rate of actions
+        self.rate = rospy.Rate(50)  # rate of actions
         self.step_n = 0  # step counter
+        self.time = time.time()
         self.max_step = 10000  # max length of episode
-        self.min_height = 0.5
+        self.min_height = 0.6
         self.pose = pose  # initial coordinates
 
         # initialize ros interfaces
@@ -81,18 +89,19 @@ class Environment(gym.Env):
         self.right_foot_contact_listener = ContactListener(name, "right_foot")
         self.reloader = Reloader(name, pose)
 
-    def reward_func(self, v_x, v_y, h, efforts, step_n):
-        # print(f"{h*0.9:.3f} {np.abs(efforts).sum()*0.016:.3f} {v*0.5:.3f}")
-        # print(f"{v_x*0.4:.3f} {h*0.9:.3f} {- np.sqrt((efforts**2).sum())/30:.3f} {- np.sqrt(v_y**2)*0.5:.3f}")
-        return v_x*0.4 + 1.1 + h*0.9 - np.sqrt((efforts**2).sum())/30 - np.sqrt(v_y**2)*0.5
+    def reward_func(self, v_x, v_y, h, pitch, efforts, step_n):
+        # print(f"{np.sqrt((1.5 - h)**2):.3f} {np.sqrt(pitch**2):.3f} {np.sqrt(efforts**2).sum()/20:.3f}")
+        return (8.0 - np.sqrt((1.48 - h)**2) - np.sqrt(pitch**2) - np.sqrt(efforts**2).sum()/30)*0.3
 
     def is_done(self, h):
         return (self.step_n > self.max_step) or (h < self.min_height)
 
     def step(self, action):
+        self.rate.sleep()
+        self.step_n += 1
 
         # do action
-        self.effort_publisher.send(action * 20)
+        self.effort_publisher.send(action * np.array([20., 20., 20., 10., 10., 20., 20., 20., 10., 10.]))
 
         # get observation data
         joint_data = self.joint_listener.get_data()
@@ -101,30 +110,42 @@ class Environment(gym.Env):
         left_contact_data = self.left_foot_contact_listener.get_data() / 1000
         right_contact_data = self.right_foot_contact_listener.get_data() / 1000
 
-        # print(f"{coordinates[-1]:.3f} {velocity_data[0]:.3f} {np.abs(action).sum():.3f}")
-        # print(f"{sum(left_contact_data[:3]):.3f}")
-
         self.state = np.concatenate((
+            orientation,
             joint_data, velocity_data, self.prev_action,
             left_contact_data, right_contact_data
         ))
-        reward = self.reward_func(velocity_data[0], velocity_data[1], coordinates[-1], action, self.step_n)  # forward speed, body height
+
+        orientation_euler = tft.euler_from_quaternion(orientation)
+        # print(orientation_euler, coordinates)
+
+        reward = self.reward_func(velocity_data[0], velocity_data[1], coordinates[2], orientation_euler[1], action, self.step_n)  # forward speed, body height
         done = self.is_done(coordinates[-1])  # body height
         info = {}
 
         # update previous action
         self.prev_action = action
-
-        self.step_n += 1
-        self.rate.sleep()
         return self.state, reward, done, False, info
 
     def reset(self, seed=None, options=None):
-        print('Episode done')
+        cur_time = time.time()
+
+        orientation, coordinates = self.link_listener.get_data("dummy")
+        print(
+            f"Episode done, " +
+            f"Steps: {self.step_n}, " +
+            f"Time: {cur_time - self.time:.3f}, " +
+            f"Hz: {self.step_n/(cur_time - self.time):.3f}, " +
+            f"X_dist: {coordinates[0]:.3f}, " +
+            f"Y_dist: {coordinates[1]:.3f}"
+        )
+
         self.effort_publisher.send(np.zeros(10))
 
         self.step_n = 0
         self.prev_action = np.zeros(10)
+
+        # self.rate = rospy.Rate(45)
 
         # reset_simulation()
         self.reloader.reload()
@@ -136,10 +157,14 @@ class Environment(gym.Env):
         velocity_data = self.velocity_listener.get_data()
         left_contact_data = self.left_foot_contact_listener.get_data() / 1000
         right_contact_data = self.right_foot_contact_listener.get_data() / 1000
+
         state = np.concatenate((
+            orientation,
             joint_data, velocity_data, self.prev_action,
             left_contact_data, right_contact_data
         ))
+
+        self.time = time.time()
         return state, {}
 
     def close(self):

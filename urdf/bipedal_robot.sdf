@@ -3,7 +3,7 @@
     <link name='dummy'>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
-        <mass>0.16</mass>
+        <mass>0.9</mass>
         <inertia>
           <ixx>0.1</ixx>
           <ixy>0</ixy>
@@ -17,34 +17,52 @@
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <box>
-            <size>0.05 0.08 0.08</size>
+            <size>0.3 0.7 0.8</size>
           </box>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <max_vel>20</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+          <friction>
+            <ode>
+              <mu>2000</mu>
+              <mu2>1000</mu2>
+            </ode>
+          </friction>
+          <bounce>
+            <restitution_coefficient>0.01</restitution_coefficient>
+            <threshold>10</threshold>
+          </bounce>
+        </surface>
       </collision>
       <visual name='dummy_fixed_joint_lump__base_link_visual'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <box>
-            <size>0.05 0.08 0.08</size>
+            <size>0.45 0.7 0.8</size>
           </box>
         </geometry>
       </visual>
     </link>
     <joint name='left_hip_joint1' type='revolute'>
-      <pose relative_to='dummy'>0 0.04 -0.03 0 -0 0</pose>
+      <pose relative_to='dummy'>0 0.35 -0.2 0 -0 0</pose>
       <parent>dummy</parent>
       <child>left_hip_link</child>
       <axis>
-        <xyz>1 0 0</xyz>
+        <xyz>0 1 0</xyz>
         <limit>
           <lower>-1.57</lower>
-          <upper>1.57</upper>
+          <upper>0.26</upper>
           <effort>20</effort>
-          <velocity>1.5</velocity>
+          <velocity>10</velocity>
         </limit>
         <dynamics>
-          <damping>0.5</damping>
-          <friction>0.3</friction>
+          <damping>0.2</damping>
+          <friction>0.02</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
@@ -66,20 +84,20 @@
       </inertial>
     </link>
     <joint name='left_hip_joint2' type='revolute'>
-      <pose relative_to='left_hip_link'>0 0 -0.03 0 -0 0</pose>
+      <pose relative_to='left_hip_link'>0 0 0 0 -0 0</pose>
       <parent>left_hip_link</parent>
       <child>left_thigh</child>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz>1 0 0</xyz>
         <limit>
-          <lower>-1.57</lower>
-          <upper>1.57</upper>
+          <lower>-0.26</lower>
+          <upper>0.78</upper>
           <effort>20</effort>
-          <velocity>1.5</velocity>
+          <velocity>10</velocity>
         </limit>
         <dynamics>
-          <damping>0.5</damping>
-          <friction>0.3</friction>
+          <damping>0.02</damping>
+          <friction>0.02</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
@@ -89,7 +107,7 @@
       <pose relative_to='left_hip_joint2'>0 0 0 0 -0 0</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
-        <mass>0.16</mass>
+        <mass>1.9</mass>
         <inertia>
           <ixx>0.1</ixx>
           <ixy>0</ixy>
@@ -100,26 +118,44 @@
         </inertia>
       </inertial>
       <collision name='left_thigh_collision_collision'>
-        <pose>0 0 -0.05 0 -0 0</pose>
+        <pose>0 0 -0.3 0 -0 0</pose>
         <geometry>
           <cylinder>
-            <length>0.1</length>
-            <radius>0.01</radius>
+            <length>0.6</length>
+            <radius>0.07</radius>
           </cylinder>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <max_vel>20</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+          <friction>
+            <ode>
+              <mu>2000</mu>
+              <mu2>1000</mu2>
+            </ode>
+          </friction>
+          <bounce>
+            <restitution_coefficient>0.01</restitution_coefficient>
+            <threshold>10</threshold>
+          </bounce>
+        </surface>
       </collision>
       <visual name='left_thigh_visual'>
-        <pose>0 0 -0.05 0 -0 0</pose>
+        <pose>0 0 -0.3 0 -0 0</pose>
         <geometry>
           <cylinder>
-            <length>0.1</length>
-            <radius>0.01</radius>
+            <length>0.6</length>
+            <radius>0.07</radius>
           </cylinder>
         </geometry>
       </visual>
     </link>
     <joint name='left_knee_joint' type='revolute'>
-      <pose relative_to='left_thigh'>0 0 -0.1 0 -0 0</pose>
+      <pose relative_to='left_thigh'>0 0 -0.6 0 -0 0</pose>
       <parent>left_thigh</parent>
       <child>left_shin</child>
       <axis>
@@ -128,11 +164,11 @@
           <lower>0</lower>
           <upper>1.57</upper>
           <effort>20</effort>
-          <velocity>1</velocity>
+          <velocity>10</velocity>
         </limit>
         <dynamics>
-          <damping>0.5</damping>
-          <friction>0.3</friction>
+          <damping>0.02</damping>
+          <friction>0.02</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
@@ -142,7 +178,7 @@
       <pose relative_to='left_knee_joint'>0 0 0 0 -0 0</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
-        <mass>0.16</mass>
+        <mass>1.3</mass>
         <inertia>
           <ixx>0.1</ixx>
           <ixy>0</ixy>
@@ -153,39 +189,57 @@
         </inertia>
       </inertial>
       <collision name='left_shin_collision_collision'>
-        <pose>0 0 -0.05 0 -0 0</pose>
+        <pose>0 0 -0.3 0 -0 0</pose>
         <geometry>
           <cylinder>
-            <length>0.1</length>
-            <radius>0.01</radius>
+            <length>0.6</length>
+            <radius>0.07</radius>
           </cylinder>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <max_vel>20</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+          <friction>
+            <ode>
+              <mu>2000</mu>
+              <mu2>1000</mu2>
+            </ode>
+          </friction>
+          <bounce>
+            <restitution_coefficient>0.01</restitution_coefficient>
+            <threshold>10</threshold>
+          </bounce>
+        </surface>
       </collision>
       <visual name='left_shin_visual'>
-        <pose>0 0 -0.05 0 -0 0</pose>
+        <pose>0 0 -0.3 0 -0 0</pose>
         <geometry>
           <cylinder>
-            <length>0.1</length>
-            <radius>0.01</radius>
+            <length>0.6</length>
+            <radius>0.07</radius>
           </cylinder>
         </geometry>
       </visual>
     </link>
     <joint name='left_ankle_joint1' type='revolute'>
-      <pose relative_to='left_shin'>0 0 -0.1 0 -0 0</pose>
+      <pose relative_to='left_shin'>0 0 -0.6 0 -0 0</pose>
       <parent>left_shin</parent>
       <child>left_ankle_link</child>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
-          <lower>-1.57</lower>
-          <upper>1.57</upper>
+          <lower>-1.05</lower>
+          <upper>0.52</upper>
           <effort>20</effort>
-          <velocity>1</velocity>
+          <velocity>10</velocity>
         </limit>
         <dynamics>
-          <damping>0.5</damping>
-          <friction>0.3</friction>
+          <damping>0.02</damping>
+          <friction>0.02</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
@@ -207,20 +261,20 @@
       </inertial>
     </link>
     <joint name='left_ankle_joint2' type='revolute'>
-      <pose relative_to='left_ankle_link'>0 0 -0.1 0 -0 0</pose>
+      <pose relative_to='left_ankle_link'>0 0 0 0 -0 0</pose>
       <parent>left_ankle_link</parent>
       <child>left_foot</child>
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
-          <lower>-1.57</lower>
-          <upper>1.57</upper>
+          <lower>-0.52</lower>
+          <upper>0.52</upper>
           <effort>20</effort>
-          <velocity>1</velocity>
+          <velocity>10</velocity>
         </limit>
         <dynamics>
-          <damping>0.5</damping>
-          <friction>0.3</friction>
+          <damping>0.02</damping>
+          <friction>0.02</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
@@ -230,7 +284,7 @@
       <pose relative_to='left_ankle_joint2'>0 0 0 0 -0 0</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
-        <mass>0.02</mass>
+        <mass>1.45</mass>
         <inertia>
           <ixx>0.1</ixx>
           <ixy>0</ixy>
@@ -241,37 +295,66 @@
         </inertia>
       </inertial>
       <collision name='left_foot_collision_collision'>
-        <pose>0 0 -0.005 0 -0 0</pose>
+        <pose>0 0 -0.04 0 -0 0</pose>
         <geometry>
           <box>
-            <size>0.05 0.04 0.01</size>
+            <size>0.55 0.4 0.08</size>
           </box>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <max_vel>20</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+          <friction>
+            <ode>
+              <mu>2000</mu>
+              <mu2>1000</mu2>
+            </ode>
+          </friction>
+          <bounce>
+            <restitution_coefficient>0.01</restitution_coefficient>
+            <threshold>10</threshold>
+          </bounce>
+        </surface>
       </collision>
       <visual name='left_foot_visual'>
-        <pose>0 0 -0.005 0 -0 0</pose>
+        <pose>0 0 -0.04 0 -0 0</pose>
         <geometry>
           <box>
-            <size>0.05 0.04 0.01</size>
+            <size>0.55 0.4 0.08</size>
           </box>
         </geometry>
       </visual>
+      <sensor name='left_foot_sensor' type='contact'>
+        <always_on>1</always_on>
+        <contact>
+          <collision>left_foot_collision_collision</collision>
+          <topic>__default_topic__</topic>
+        </contact>
+        <plugin name='gazebo_ros_bumper_plugin' filename='libgazebo_ros_bumper.so'>
+          <bumperTopicName>left_foot_contact</bumperTopicName>
+          <frameName>left_foot</frameName>
+        </plugin>
+      </sensor>
     </link>
     <joint name='right_hip_joint1' type='revolute'>
-      <pose relative_to='dummy'>0 -0.04 -0.03 0 -0 0</pose>
+      <pose relative_to='dummy'>0 -0.35 -0.2 0 -0 0</pose>
       <parent>dummy</parent>
       <child>right_hip_link</child>
       <axis>
-        <xyz>1 0 0</xyz>
+        <xyz>0 1 0</xyz>
         <limit>
           <lower>-1.57</lower>
-          <upper>1.57</upper>
+          <upper>0.26</upper>
           <effort>20</effort>
-          <velocity>1.5</velocity>
+          <velocity>10</velocity>
         </limit>
         <dynamics>
-          <damping>0.5</damping>
-          <friction>0.3</friction>
+          <damping>0.2</damping>
+          <friction>0.02</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
@@ -293,20 +376,20 @@
       </inertial>
     </link>
     <joint name='right_hip_joint2' type='revolute'>
-      <pose relative_to='right_hip_link'>0 0 -0.03 0 -0 0</pose>
+      <pose relative_to='right_hip_link'>0 0 0 0 -0 0</pose>
       <parent>right_hip_link</parent>
       <child>right_thigh</child>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz>1 0 0</xyz>
         <limit>
-          <lower>-1.57</lower>
-          <upper>1.57</upper>
+          <lower>-0.78</lower>
+          <upper>0.26</upper>
           <effort>20</effort>
-          <velocity>1.5</velocity>
+          <velocity>10</velocity>
         </limit>
         <dynamics>
-          <damping>0.5</damping>
-          <friction>0.3</friction>
+          <damping>0.02</damping>
+          <friction>0.02</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
@@ -316,7 +399,7 @@
       <pose relative_to='right_hip_joint2'>0 0 0 0 -0 0</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
-        <mass>0.16</mass>
+        <mass>1.9</mass>
         <inertia>
           <ixx>0.1</ixx>
           <ixy>0</ixy>
@@ -327,26 +410,44 @@
         </inertia>
       </inertial>
       <collision name='right_thigh_collision_collision'>
-        <pose>0 0 -0.05 0 -0 0</pose>
+        <pose>0 0 -0.3 0 -0 0</pose>
         <geometry>
           <cylinder>
-            <length>0.1</length>
-            <radius>0.01</radius>
+            <length>0.6</length>
+            <radius>0.07</radius>
           </cylinder>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <max_vel>20</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+          <friction>
+            <ode>
+              <mu>2000</mu>
+              <mu2>1000</mu2>
+            </ode>
+          </friction>
+          <bounce>
+            <restitution_coefficient>0.01</restitution_coefficient>
+            <threshold>10</threshold>
+          </bounce>
+        </surface>
       </collision>
       <visual name='right_thigh_visual'>
-        <pose>0 0 -0.05 0 -0 0</pose>
+        <pose>0 0 -0.3 0 -0 0</pose>
         <geometry>
           <cylinder>
-            <length>0.1</length>
-            <radius>0.01</radius>
+            <length>0.6</length>
+            <radius>0.07</radius>
           </cylinder>
         </geometry>
       </visual>
     </link>
     <joint name='right_knee_joint' type='revolute'>
-      <pose relative_to='right_thigh'>0 0 -0.1 0 -0 0</pose>
+      <pose relative_to='right_thigh'>0 0 -0.6 0 -0 0</pose>
       <parent>right_thigh</parent>
       <child>right_shin</child>
       <axis>
@@ -355,11 +456,11 @@
           <lower>0</lower>
           <upper>1.57</upper>
           <effort>20</effort>
-          <velocity>1</velocity>
+          <velocity>10</velocity>
         </limit>
         <dynamics>
-          <damping>0.5</damping>
-          <friction>0.3</friction>
+          <damping>0.02</damping>
+          <friction>0.02</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
@@ -369,7 +470,7 @@
       <pose relative_to='right_knee_joint'>0 0 0 0 -0 0</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
-        <mass>0.16</mass>
+        <mass>1.3</mass>
         <inertia>
           <ixx>0.1</ixx>
           <ixy>0</ixy>
@@ -380,39 +481,57 @@
         </inertia>
       </inertial>
       <collision name='right_shin_collision_collision'>
-        <pose>0 0 -0.05 0 -0 0</pose>
+        <pose>0 0 -0.3 0 -0 0</pose>
         <geometry>
           <cylinder>
-            <length>0.1</length>
-            <radius>0.01</radius>
+            <length>0.6</length>
+            <radius>0.07</radius>
           </cylinder>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <max_vel>20</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+          <friction>
+            <ode>
+              <mu>2000</mu>
+              <mu2>1000</mu2>
+            </ode>
+          </friction>
+          <bounce>
+            <restitution_coefficient>0.01</restitution_coefficient>
+            <threshold>10</threshold>
+          </bounce>
+        </surface>
       </collision>
       <visual name='right_shin_visual'>
-        <pose>0 0 -0.05 0 -0 0</pose>
+        <pose>0 0 -0.3 0 -0 0</pose>
         <geometry>
           <cylinder>
-            <length>0.1</length>
-            <radius>0.01</radius>
+            <length>0.6</length>
+            <radius>0.07</radius>
           </cylinder>
         </geometry>
       </visual>
     </link>
     <joint name='right_ankle_joint1' type='revolute'>
-      <pose relative_to='right_shin'>0 0 -0.1 0 -0 0</pose>
+      <pose relative_to='right_shin'>0 0 -0.6 0 -0 0</pose>
       <parent>right_shin</parent>
       <child>right_ankle_link</child>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
-          <lower>-1.57</lower>
-          <upper>1.57</upper>
+          <lower>-1.05</lower>
+          <upper>0.52</upper>
           <effort>20</effort>
-          <velocity>1</velocity>
+          <velocity>10</velocity>
         </limit>
         <dynamics>
-          <damping>0.5</damping>
-          <friction>0.3</friction>
+          <damping>0.02</damping>
+          <friction>0.02</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
@@ -434,20 +553,20 @@
       </inertial>
     </link>
     <joint name='right_ankle_joint2' type='revolute'>
-      <pose relative_to='right_ankle_link'>0 0 -0.1 0 -0 0</pose>
+      <pose relative_to='right_ankle_link'>0 0 0 0 -0 0</pose>
       <parent>right_ankle_link</parent>
       <child>right_foot</child>
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
-          <lower>-1.57</lower>
-          <upper>1.57</upper>
+          <lower>-0.52</lower>
+          <upper>0.52</upper>
           <effort>20</effort>
-          <velocity>1</velocity>
+          <velocity>10</velocity>
         </limit>
         <dynamics>
-          <damping>0.5</damping>
-          <friction>0.3</friction>
+          <damping>0.02</damping>
+          <friction>0.02</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
@@ -457,7 +576,7 @@
       <pose relative_to='right_ankle_joint2'>0 0 0 0 -0 0</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
-        <mass>0.02</mass>
+        <mass>1.45</mass>
         <inertia>
           <ixx>0.1</ixx>
           <ixy>0</ixy>
@@ -468,21 +587,50 @@
         </inertia>
       </inertial>
       <collision name='right_foot_collision_collision'>
-        <pose>0 0 -0.005 0 -0 0</pose>
+        <pose>0 0 -0.04 0 -0 0</pose>
         <geometry>
           <box>
-            <size>0.05 0.04 0.01</size>
+            <size>0.55 0.4 0.08</size>
           </box>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <max_vel>20</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+          <friction>
+            <ode>
+              <mu>2000</mu>
+              <mu2>1000</mu2>
+            </ode>
+          </friction>
+          <bounce>
+            <restitution_coefficient>0.01</restitution_coefficient>
+            <threshold>10</threshold>
+          </bounce>
+        </surface>
       </collision>
       <visual name='right_foot_visual'>
-        <pose>0 0 -0.005 0 -0 0</pose>
+        <pose>0 0 -0.04 0 -0 0</pose>
         <geometry>
           <box>
-            <size>0.05 0.04 0.01</size>
+            <size>0.55 0.4 0.08</size>
           </box>
         </geometry>
       </visual>
+      <sensor name='right_foot_sensor' type='contact'>
+        <always_on>1</always_on>
+        <contact>
+          <collision>right_foot_collision_collision</collision>
+          <topic>__default_topic__</topic>
+        </contact>
+        <plugin name='gazebo_ros_bumper_plugin' filename='libgazebo_ros_bumper.so'>
+          <bumperTopicName>right_foot_contact</bumperTopicName>
+          <frameName>right_foot</frameName>
+        </plugin>
+      </sensor>
     </link>
     <static>0</static>
     <plugin name='gazebo_ros_control' filename='libgazebo_ros_control.so'/>

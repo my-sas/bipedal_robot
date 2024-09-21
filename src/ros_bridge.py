@@ -19,8 +19,6 @@ from gazebo_msgs.srv import SetModelConfiguration
 from gazebo_msgs.srv import SetModelConfigurationRequest
 from gazebo_msgs.srv import SetModelState
 from gazebo_msgs.msg import ModelState
-from geometry_msgs.msg import Pose
-from controller_manager_msgs.srv import SwitchController
 from std_srvs.srv import Empty
 
 # from geometry_msgs.msg import Pose
@@ -121,7 +119,7 @@ class Spawner:
 class ContactListener:
     def __init__(self, name, link):
         rospy.Subscriber(f"/{name}/{link}_contact", ContactsState, self.callback)
-        self.contacts = None
+        self.contacts = np.zeros(6)
 
     def callback(self, data):
         if len(data.states) != 0:
@@ -176,8 +174,8 @@ class Reloader:
         self.model_state_req.model_state.reference_frame = 'world'
 
     def reload(self):
-        rospy.wait_for_service('/gazebo/pause_physics')
-        self.pause_proxy()
+        # rospy.wait_for_service('/gazebo/pause_physics')
+        # self.pause_proxy()
 
         rospy.wait_for_service('/gazebo/set_model_state')
         self.model_state_proxy(self.model_state_req)
@@ -185,10 +183,10 @@ class Reloader:
         rospy.wait_for_service('/gazebo/set_model_configuration')
         self.model_config_proxy(self.model_config_req)
 
-        rospy.wait_for_service('/gazebo/unpause_physics')
-        self.unpause_proxy()
+        # rospy.wait_for_service('/gazebo/unpause_physics')
+        # self.unpause_proxy()
 
-        rospy.sleep(0.5)
+        rospy.sleep(1)
 
 
 
