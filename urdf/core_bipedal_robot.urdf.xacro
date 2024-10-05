@@ -122,7 +122,7 @@
             <child link="${name}_hip_link"/>
             <origin xyz="0 ${shift} ${-torso_height/2+0.2}" rpy="0 0 0"/>
             <axis xyz="0 1 0"/>
-            <limit lower="-1.57" upper="0.26" effort="20" velocity="10"/>
+            <limit lower="-1.57" upper="0.52" effort="50" velocity="10"/>
             <dynamics damping="0.3" friction="0.07"/>
         </joint>
 
@@ -131,7 +131,7 @@
             <child link="${name}_thigh"/>
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <axis xyz="1 0 0"/>
-            <limit lower="${hip_left_limit}" upper="${hip_right_limit}" effort="20" velocity="10"/>
+            <limit lower="${hip_left_limit}" upper="${hip_right_limit}" effort="50" velocity="10"/>
             <dynamics damping="0.3" friction="0.07"/>
         </joint>
 
@@ -140,7 +140,7 @@
             <child link="${name}_shin"/>
             <origin xyz="0 0 ${-thigh_len}" rpy="0 0 0"/>
             <axis xyz="0 1 0"/>
-            <limit lower="0.0" upper="1.57" effort="20" velocity="10"/>
+            <limit lower="-0.17" upper="1.57" effort="50" velocity="10"/>
             <dynamics damping="0.2" friction="0"/>
         </joint>
 
@@ -149,8 +149,8 @@
             <child link="${name}_ankle_link"/>
             <origin xyz="0 0 ${-shin_len}" rpy="0 0 0"/>
             <axis xyz="0 1 0"/>
-            <limit lower="-1.05" upper="0.52" effort="10" velocity="10"/>
-            <dynamics damping="0.05" friction="0"/>
+            <limit lower="-1.05" upper="0.52" effort="30" velocity="10"/>
+            <dynamics friction="0"/>
         </joint>
 
         <joint name="${name}_ankle_joint2" type="revolute">
@@ -158,8 +158,8 @@
             <child link="${name}_foot"/>
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <axis xyz="1 0 0"/>
-            <limit lower="-0.52" upper="0.52" effort="10" velocity="10"/>
-            <dynamics damping="0.05" friction="0"/>
+            <limit lower="-0.52" upper="0.52" effort="30" velocity="10"/>
+            <dynamics friction="0"/>
         </joint>
 	</xacro:macro>
 

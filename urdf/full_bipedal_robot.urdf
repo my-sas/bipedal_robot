@@ -22,7 +22,7 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.9"/>
+      <mass value="1.1"/>
       <origin xyz="0 0 0"/>
       <inertia ixx="0.1" ixy="0.0" ixz="0.0" iyy="0.1" iyz="0.0" izz="0.1"/>
     </inertial>
@@ -89,7 +89,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 -0.04"/>
       <geometry>
-        <box size="0.55 0.4 0.08"/>
+        <box size="0.6 0.5 0.08"/>
       </geometry>
       <material name="blue">
         <color rgba="0 0 1 1"/>
@@ -98,11 +98,11 @@
     <collision name="left_foot_collision">
       <origin rpy="0 0 0" xyz="0 0 -0.04"/>
       <geometry>
-        <box size="0.55 0.4 0.08"/>
+        <box size="0.6 0.5 0.08"/>
       </geometry>
     </collision>
     <inertial>
-      <mass value="1.45"/>
+      <mass value="1.3"/>
       <origin xyz="0 0 0"/>
       <inertia ixx="0.1" ixy="0.0" ixz="0.0" iyy="0.1" iyz="0.0" izz="0.1"/>
     </inertial>
@@ -112,40 +112,40 @@
     <child link="left_hip_link"/>
     <origin rpy="0 0 0" xyz="0 0.35 -0.2"/>
     <axis xyz="0 1 0"/>
-    <limit effort="20" lower="-1.57" upper="0.26" velocity="10"/>
-    <dynamics damping="0.2" friction="0.02"/>
+    <limit effort="50" lower="-1.57" upper="0.52" velocity="10"/>
+    <dynamics damping="0.3" friction="0.07"/>
   </joint>
   <joint name="left_hip_joint2" type="revolute">
     <parent link="left_hip_link"/>
     <child link="left_thigh"/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <axis xyz="1 0 0"/>
-    <limit effort="20" lower="-0.26" upper="0.78" velocity="10"/>
-    <dynamics damping="0.02" friction="0.02"/>
+    <limit effort="50" lower="-0.26" upper="0.78" velocity="10"/>
+    <dynamics damping="0.3" friction="0.07"/>
   </joint>
   <joint name="left_knee_joint" type="revolute">
     <parent link="left_thigh"/>
     <child link="left_shin"/>
     <origin rpy="0 0 0" xyz="0 0 -0.6"/>
     <axis xyz="0 1 0"/>
-    <limit effort="20" lower="0.0" upper="1.57" velocity="10"/>
-    <dynamics damping="0.02" friction="0.02"/>
+    <limit effort="50" lower="-0.17" upper="1.57" velocity="10"/>
+    <dynamics damping="0.2" friction="0"/>
   </joint>
   <joint name="left_ankle_joint1" type="revolute">
     <parent link="left_shin"/>
     <child link="left_ankle_link"/>
     <origin rpy="0 0 0" xyz="0 0 -0.6"/>
     <axis xyz="0 1 0"/>
-    <limit effort="20" lower="-1.05" upper="0.52" velocity="10"/>
-    <dynamics damping="0.02" friction="0.02"/>
+    <limit effort="30" lower="-1.05" upper="0.52" velocity="10"/>
+    <dynamics friction="0"/>
   </joint>
   <joint name="left_ankle_joint2" type="revolute">
     <parent link="left_ankle_link"/>
     <child link="left_foot"/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <axis xyz="1 0 0"/>
-    <limit effort="20" lower="-0.52" upper="0.52" velocity="10"/>
-    <dynamics damping="0.02" friction="0.02"/>
+    <limit effort="30" lower="-0.52" upper="0.52" velocity="10"/>
+    <dynamics friction="0"/>
   </joint>
   <link name="right_hip_link">
     <inertial>
@@ -209,7 +209,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 -0.04"/>
       <geometry>
-        <box size="0.55 0.4 0.08"/>
+        <box size="0.6 0.5 0.08"/>
       </geometry>
       <material name="blue">
         <color rgba="0 0 1 1"/>
@@ -218,11 +218,11 @@
     <collision name="right_foot_collision">
       <origin rpy="0 0 0" xyz="0 0 -0.04"/>
       <geometry>
-        <box size="0.55 0.4 0.08"/>
+        <box size="0.6 0.5 0.08"/>
       </geometry>
     </collision>
     <inertial>
-      <mass value="1.45"/>
+      <mass value="1.3"/>
       <origin xyz="0 0 0"/>
       <inertia ixx="0.1" ixy="0.0" ixz="0.0" iyy="0.1" iyz="0.0" izz="0.1"/>
     </inertial>
@@ -232,46 +232,66 @@
     <child link="right_hip_link"/>
     <origin rpy="0 0 0" xyz="0 -0.35 -0.2"/>
     <axis xyz="0 1 0"/>
-    <limit effort="20" lower="-1.57" upper="0.26" velocity="10"/>
-    <dynamics damping="0.2" friction="0.02"/>
+    <limit effort="50" lower="-1.57" upper="0.52" velocity="10"/>
+    <dynamics damping="0.3" friction="0.07"/>
   </joint>
   <joint name="right_hip_joint2" type="revolute">
     <parent link="right_hip_link"/>
     <child link="right_thigh"/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <axis xyz="1 0 0"/>
-    <limit effort="20" lower="-0.78" upper="0.26" velocity="10"/>
-    <dynamics damping="0.02" friction="0.02"/>
+    <limit effort="50" lower="-0.78" upper="0.26" velocity="10"/>
+    <dynamics damping="0.3" friction="0.07"/>
   </joint>
   <joint name="right_knee_joint" type="revolute">
     <parent link="right_thigh"/>
     <child link="right_shin"/>
     <origin rpy="0 0 0" xyz="0 0 -0.6"/>
     <axis xyz="0 1 0"/>
-    <limit effort="20" lower="0.0" upper="1.57" velocity="10"/>
-    <dynamics damping="0.02" friction="0.02"/>
+    <limit effort="50" lower="-0.17" upper="1.57" velocity="10"/>
+    <dynamics damping="0.2" friction="0"/>
   </joint>
   <joint name="right_ankle_joint1" type="revolute">
     <parent link="right_shin"/>
     <child link="right_ankle_link"/>
     <origin rpy="0 0 0" xyz="0 0 -0.6"/>
     <axis xyz="0 1 0"/>
-    <limit effort="20" lower="-1.05" upper="0.52" velocity="10"/>
-    <dynamics damping="0.02" friction="0.02"/>
+    <limit effort="30" lower="-1.05" upper="0.52" velocity="10"/>
+    <dynamics friction="0"/>
   </joint>
   <joint name="right_ankle_joint2" type="revolute">
     <parent link="right_ankle_link"/>
     <child link="right_foot"/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <axis xyz="1 0 0"/>
-    <limit effort="20" lower="-0.52" upper="0.52" velocity="10"/>
-    <dynamics damping="0.02" friction="0.02"/>
+    <limit effort="30" lower="-0.52" upper="0.52" velocity="10"/>
+    <dynamics friction="0"/>
   </joint>
   <link name="dummy"/>
   <joint name="dummy_joint" type="fixed">
     <parent link="dummy"/>
     <child link="base_link"/>
   </joint>
+  <gazebo reference="right_foot">
+    <collision name="right_foot_collision_collision">
+      <surface>
+        <bounce>
+          <restitution_coefficient>0.9</restitution_coefficient>
+          <threshold>0.0</threshold>
+        </bounce>
+      </surface>
+    </collision>
+  </gazebo>
+  <gazebo reference="left_foot">
+    <collision name="left_foot_collision_collision">
+      <surface>
+        <bounce>
+          <restitution_coefficient>0.9</restitution_coefficient>
+          <threshold>0.0</threshold>
+        </bounce>
+      </surface>
+    </collision>
+  </gazebo>
   <transmission name="left_hip_joint1_transmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="left_hip_joint1">
@@ -373,45 +393,45 @@
     </actuator>
   </transmission>
   <gazebo reference="base_link">
-    <mu1>2000.0</mu1>
-    <mu2>1000.0</mu2>
-    <minDepth>0.001</minDepth>
+    <mu1>10000.0</mu1>
+    <mu2>10000.0</mu2>
+    <minDepth>0.01</minDepth>
     <maxVel value="20.0"/>
   </gazebo>
   <gazebo reference="left_thigh">
-    <mu1>2000.0</mu1>
-    <mu2>1000.0</mu2>
-    <minDepth>0.001</minDepth>
+    <mu1>10000.0</mu1>
+    <mu2>10000.0</mu2>
+    <minDepth>0.01</minDepth>
     <maxVel value="20.0"/>
   </gazebo>
   <gazebo reference="left_shin">
-    <mu1>2000.0</mu1>
-    <mu2>1000.0</mu2>
-    <minDepth>0.001</minDepth>
+    <mu1>10000.0</mu1>
+    <mu2>10000.0</mu2>
+    <minDepth>0.01</minDepth>
     <maxVel value="20.0"/>
   </gazebo>
   <gazebo reference="left_foot">
-    <mu1>2000.0</mu1>
-    <mu2>1000.0</mu2>
-    <minDepth>0.001</minDepth>
+    <mu1>10000.0</mu1>
+    <mu2>10000.0</mu2>
+    <minDepth>0.01</minDepth>
     <maxVel value="20.0"/>
   </gazebo>
   <gazebo reference="right_thigh">
-    <mu1>2000.0</mu1>
-    <mu2>1000.0</mu2>
-    <minDepth>0.001</minDepth>
+    <mu1>10000.0</mu1>
+    <mu2>10000.0</mu2>
+    <minDepth>0.01</minDepth>
     <maxVel value="20.0"/>
   </gazebo>
   <gazebo reference="right_shin">
-    <mu1>2000.0</mu1>
-    <mu2>1000.0</mu2>
-    <minDepth>0.001</minDepth>
+    <mu1>10000.0</mu1>
+    <mu2>10000.0</mu2>
+    <minDepth>0.01</minDepth>
     <maxVel value="20.0"/>
   </gazebo>
   <gazebo reference="right_foot">
-    <mu1>2000.0</mu1>
-    <mu2>1000.0</mu2>
-    <minDepth>0.001</minDepth>
+    <mu1>10000.0</mu1>
+    <mu2>10000.0</mu2>
+    <minDepth>0.01</minDepth>
     <maxVel value="20.0"/>
   </gazebo>
   <gazebo>

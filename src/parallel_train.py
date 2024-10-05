@@ -3,6 +3,7 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv
 from environment import Environment
 import numpy as np
+import rospy
 import time
 
 NUM_PROC = 2
@@ -29,6 +30,7 @@ def make_env(name, pose):
 
 
 if __name__ == '__main__':
+    rospy.init_node("train_env")
     names = [BASE_NAME + str(i) for i in range(NUM_PROC)]
     poses = []
     pose = INIT_POSE.copy()
@@ -36,7 +38,7 @@ if __name__ == '__main__':
         poses.append(pose.copy())
         pose[1] += SPACE
 
-    env = SubprocVecEnv([make_env(name, pose) for name, pose in zip(names, poses)])
+    env = DummyVecEnv([make_env(name, pose) for name, pose in zip(names, poses)])
 
-    model = PPO.load("../models/weights2.zip", env=env)
+    model = PPO("MlpPolicy", env, learning_rate=0.01, device="cuda")
     model.learn(total_timesteps=1000000)

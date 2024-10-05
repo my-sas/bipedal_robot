@@ -24,12 +24,34 @@
 
 	<xacro:macro name="contact" params="link">
         <gazebo reference="${link}">
-            <mu1>1.0</mu1>
-            <mu2>1.0</mu2>
-            <minDepth>0.01</minDepth>
-            <maxVel value="20.0"/>
+            <mu1>10000.0</mu1>
+            <mu2>10000.0</mu2>
+            <minDepth>0.001</minDepth>
+            <maxVel value="0.0"/>
         </gazebo>
 	</xacro:macro>
+
+	<gazebo reference="right_foot">
+	    <collision name='right_foot_collision_collision'>
+	        <surface>
+                <bounce>
+                    <restitution_coefficient>0.9</restitution_coefficient>
+                    <threshold>0.0</threshold>
+                </bounce>
+            </surface>
+	    </collision>
+	</gazebo>
+
+	<gazebo reference="left_foot">
+	    <collision name='left_foot_collision_collision'>
+	        <surface>
+                <bounce>
+                    <restitution_coefficient>0.9</restitution_coefficient>
+                    <threshold>0.0</threshold>
+                </bounce>
+            </surface>
+	    </collision>
+	</gazebo>
 
 	<xacro:transmission joint="left_hip_joint1"/>
 	<xacro:transmission joint="left_hip_joint2"/>
